@@ -8,14 +8,6 @@ type Props = {
   };
 };
 
-export async function generateMetadata({ params }: Props) {
-  const path = params.slug.join('/');
-  const fileName = path.split('/').pop()?.replace('.md', '') || 'Document';
-  return {
-    title: `${fileName} | Seon Explorer`,
-  };
-}
-
 export default async function MarkdownPage({ params }: Props) {
   const path = params.slug.join('/');
   if (!path) {
@@ -23,10 +15,6 @@ export default async function MarkdownPage({ params }: Props) {
   }
 
   const content = await getFileContent(path);
-
-  if (!content || content.startsWith('Error loading content')) {
-    notFound();
-  }
   
   const htmlContent = await marked.parse(content);
 

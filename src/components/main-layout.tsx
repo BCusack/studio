@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { FileText, Github, Home } from 'lucide-react';
+import { FileText, Folder, Github, Home } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import {
   SidebarProvider,
@@ -17,14 +17,75 @@ import {
   SidebarTrigger,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarMenuSub,
 } from '@/components/ui/sidebar';
 import { DynamicMenu } from './dynamic-menu';
 import { ScrollArea } from './ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import React from 'react';
+
+type FileTree = {
+  [key: string]: FileTree | string;
+};
+
+const buildFileTree = (paths: string[]): FileTree => {
+  const tree: FileTree = {};
+  paths.forEach(path => {
+    let currentLevel = tree;
+    const parts = path.split('/');
+    parts.forEach((part, index) => {
+      if (index === parts.length - 1) {
+        currentLevel[part] = path;
+      } else {
+        currentLevel[part] = currentLevel[part] || {};
+        currentLevel = currentLevel[part] as FileTree;
+      }
+    });
+  });
+  return tree;
+};
+
+const renderFileTree = (tree: FileTree, pathname: string | null) => {
+  return Object.entries(tree).map(([name, content]) => {
+    const fileName = name.replace('.md', '');
+
+    if (typeof content === 'string') {
+      return (
+        <SidebarMenuItem key={content}>
+          <SidebarMenuButton asChild isActive={`/${content}` === pathname} tooltip={fileName}>
+            <Link href={`/${content}`}>
+              <FileText />
+              <span>{fileName}</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      );
+    } else {
+      return (
+        <SidebarMenuItem key={name}>
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <SidebarMenuButton>
+                <Folder />
+                <span>{name}</span>
+              </SidebarMenuButton>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <SidebarMenuSub>
+                {renderFileTree(content, pathname)}
+              </SidebarMenuSub>
+            </CollapsibleContent>
+          </Collapsible>
+        </SidebarMenuItem>
+      );
+    }
+  });
+};
+
 
 export default function MainLayout({ files, children }: { files: string[], children: ReactNode }) {
   const pathname = usePathname();
-
-  const getFileName = (path: string) => path.split('/').pop()?.replace('.md', '') || '';
+  const fileTree = buildFileTree(files);
 
   return (
     <SidebarProvider>
@@ -71,16 +132,7 @@ export default function MainLayout({ files, children }: { files: string[], child
             <SidebarGroup>
               <SidebarGroupLabel>All Files</SidebarGroupLabel>
               <SidebarMenu>
-                {files.map(file => (
-                  <SidebarMenuItem key={file}>
-                    <SidebarMenuButton asChild isActive={`/${file}` === pathname} tooltip={getFileName(file)}>
-                      <Link href={`/${file}`}>
-                        <FileText />
-                        <span>{getFileName(file)}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {renderFileTree(fileTree, pathname)}
               </SidebarMenu>
             </SidebarGroup>
           </ScrollArea>
@@ -88,10 +140,12 @@ export default function MainLayout({ files, children }: { files: string[], child
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-                <a href="https://github.com/BCusack/Seon" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+              <SidebarMenuButton asChild>
+                <a href="https://github.com/BCusack/Seon" target="_blank" rel="noopener noreferrer">
                     <Github />
                     <span>Source Repository</span>
                 </a>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
