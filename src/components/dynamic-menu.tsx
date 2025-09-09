@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { generateDynamicMenu } from '@/ai/flows/dynamic-menu-generation';
+import type { GenerateDynamicMenuInput } from '@/ai/schemas/dynamic-menu-schema';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Loader2, FileText } from 'lucide-react';
