@@ -1,7 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bot, FileCode, Github } from 'lucide-react';
+import { DynamicMenu } from '@/components/dynamic-menu';
+import { getRepoFiles } from '@/lib/github';
 
-export default function Home() {
+export default async function Home() {
+  const files = await getRepoFiles();
+
   return (
     <div className="container mx-auto">
       <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -29,12 +33,28 @@ export default function Home() {
             Welcome to Seon Explorer
           </h1>
         </div>
-        <p className="max-w-2xl text-lg text-muted-foreground">
-          An intelligent document browser. Use the sidebar to navigate through Markdown files fetched from a GitHub repository, or use the AI-powered search to find what you're looking for.
+        <p className="max-w-3xl text-lg text-muted-foreground">
+          An intelligent document browser. Use the menu to navigate through Markdown files, or use the AI-powered search below to find what you're looking for.
         </p>
       </div>
 
-      <div className="mt-12 grid gap-6 md:grid-cols-3">
+      <Card className="mt-12 max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-headline">
+            <Bot className="text-primary" />
+            AI-Powered Search
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">
+            Leverages a GenAI model to create a dynamic navigation menu based on your search query.
+          </p>
+          <DynamicMenu allFiles={files} />
+        </CardContent>
+      </Card>
+
+
+      <div className="mt-12 grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-headline">
@@ -45,19 +65,6 @@ export default function Home() {
           <CardContent>
             <p className="text-muted-foreground">
               Fetches and displays Markdown files directly from a public GitHub repository in real-time.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 font-headline">
-              <Bot className="text-primary" />
-              AI-Powered Search
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Leverages a GenAI model to create a dynamic navigation menu based on your search query.
             </p>
           </CardContent>
         </Card>
