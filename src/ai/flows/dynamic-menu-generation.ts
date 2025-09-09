@@ -8,9 +8,9 @@
  * - GenerateDynamicMenuOutput - The return type for the generateDynamicMenu function.
  */
 
-import {ai} from '@/ai/genkit';
-import { GenerateDynamicMenuInputSchema, GenerateDynamicMenuOutputSchema, GenerateDynamicMenuInput, GenerateDynamicMenuOutput as GenerateDynamicMenuOutput } from '../schemas/dynamic-menu-schema';
-export type {GenerateDynamicMenuInput, GenerateDynamicMenuOutput};
+import { ai } from '@/ai/genkit';
+import { GenerateDynamicMenuInputSchema, GenerateDynamicMenuOutputSchema } from '../schemas/dynamic-menu-schema';
+import type { GenerateDynamicMenuInput, GenerateDynamicMenuOutput } from '../schemas/dynamic-menu-schema';
 
 
 export async function generateDynamicMenu(input: GenerateDynamicMenuInput): Promise<GenerateDynamicMenuOutput> {
@@ -19,8 +19,8 @@ export async function generateDynamicMenu(input: GenerateDynamicMenuInput): Prom
 
 const prompt = ai.definePrompt({
   name: 'dynamicMenuPrompt',
-  input: {schema: GenerateDynamicMenuInputSchema},
-  output: {schema: GenerateDynamicMenuOutputSchema},
+  input: { schema: GenerateDynamicMenuInputSchema },
+  output: { schema: GenerateDynamicMenuOutputSchema },
   prompt: `You are an expert documentation curator. Given a list of Markdown file names and a user query, select the most relevant files for a navigation menu.
 
 File Names: {{fileNames}}
@@ -35,7 +35,7 @@ Select only the files that are highly relevant to the user query. Return the sel
 {{/if}}
 
 Ensure that the output is a JSON array of strings.
-`,config: {
+`, config: {
     safetySettings: [
       {
         category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
@@ -60,7 +60,7 @@ const generateDynamicMenuFlow = ai.defineFlow(
     outputSchema: GenerateDynamicMenuOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const { output } = await prompt(input);
     return output!;
   }
 );

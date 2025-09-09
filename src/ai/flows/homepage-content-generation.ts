@@ -12,8 +12,8 @@ if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
  */
 
 import { ai } from '@/ai/genkit';
-import { HomepageContentInputSchema, HomepageContentOutputSchema, HomepageContentInput, HomepageContentOutput as HomepageContentOutput } from '../schemas/homepage-content-schema';
-export type { HomepageContentInput, HomepageContentOutput };
+import { HomepageContentInputSchema, HomepageContentOutputSchema } from '../schemas/homepage-content-schema';
+import type { HomepageContentInput, HomepageContentOutput } from '../schemas/homepage-content-schema';
 
 
 export async function generateHomepageContent(input: HomepageContentInput): Promise<HomepageContentOutput> {
