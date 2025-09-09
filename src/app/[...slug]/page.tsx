@@ -24,7 +24,7 @@ export default async function MarkdownPage({ params }: Props) {
 
   const content = await getFileContent(path);
 
-  if (content.startsWith('Error loading content')) {
+  if (!content || content.startsWith('Error loading content')) {
     notFound();
   }
   
