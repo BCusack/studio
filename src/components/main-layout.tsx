@@ -88,12 +88,10 @@ export default function MainLayout({ files, children }: { files: string[], child
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <a href="https://github.com/BCusack/Seon" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/BCusack/Seon" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                     <Github />
                     <span>Source Repository</span>
                 </a>
-              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
