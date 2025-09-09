@@ -1,6 +1,6 @@
-import { getFileContent } from '@/lib/github';
-import { marked } from 'marked';
-import { notFound } from 'next/navigation';
+import { getFileContent } from "@/lib/github";
+import { marked } from "marked";
+import { notFound } from "next/navigation";
 
 type Props = {
   params: {
@@ -9,13 +9,14 @@ type Props = {
 };
 
 export default async function MarkdownPage({ params }: Props) {
-  const path = params.slug.join('/');
+  const resolvedParams = (await params) as { slug: string[] };
+  const path = resolvedParams.slug.join("/");
   if (!path) {
     notFound();
   }
 
   const content = await getFileContent(path);
-  
+
   const htmlContent = await marked.parse(content);
 
   return (
