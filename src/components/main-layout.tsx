@@ -69,7 +69,7 @@ export default function MainLayout({ files, children }: { files: string[], child
   return (
     <div className="flex flex-col min-h-svh">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
+        <div className="container flex h-14 items-center px-4">
           <div className="mr-4 flex items-center">
             <Link href="/" className="flex items-center gap-2">
               <svg
