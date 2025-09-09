@@ -82,7 +82,7 @@ export default async function Home() {
   const homepageContent = await getHomepageContent();
 
   return (
-    <div className="container mx-auto">
+    <div className="mx-auto max-w-5xl px-4">
       <div className="flex flex-col items-center justify-center space-y-4 text-center py-16">
         <div className="flex items-center gap-4">
           <svg
@@ -122,7 +122,7 @@ export default async function Home() {
           homepageContent.sections.map((section, index) => {
             const Icon = iconMap[section.icon] || FileText;
             return (
-              <section key={index} className="max-w-3xl mx-auto">
+              <section key={index} className="max-w-3xl mx-auto px-4">
                 <div className="flex items-center gap-3">
                   <Icon className="size-8 text-primary" />
                   <h2 className="text-3xl font-bold font-headline">
