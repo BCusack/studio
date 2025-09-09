@@ -1,10 +1,9 @@
 'use server';
 
 const GITHUB_API_URL = 'https://api.github.com';
-// Using tldr-pages as it has a large, flat collection of markdown files.
-const REPO_OWNER = 'tldr-pages';
-const REPO_NAME = 'tldr';
-const REPO_PATH = 'pages/common';
+const REPO_OWNER = 'BCusack';
+const REPO_NAME = 'Seon';
+const REPO_PATH = ''; // Fetch from the root
 const REPO_BRANCH = 'main';
 
 const GITHUB_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
@@ -32,7 +31,7 @@ export async function getRepoFiles(): Promise<string[]> {
     const data: GitHubFile[] = await response.json();
     return data
       .filter(item => item.type === 'file' && item.name.endsWith('.md'))
-      .map(item => item.path);
+      .map(item => item.path); // Return the path, which is just the filename at the root
   } catch (error) {
     console.error('Error in getRepoFiles:', error);
     return [];

@@ -88,12 +88,12 @@ export default function MainLayout({ files, children }: { files: string[], child
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <a href="https://github.com/tldr-pages/tldr" target="_blank" rel="noopener noreferrer">
-                <SidebarMenuButton tooltip="GitHub Repository">
-                  <Github />
-                  <span>Source Repository</span>
-                </SidebarMenuButton>
-              </a>
+              <SidebarMenuButton asChild>
+                <a href="https://github.com/BCusack/Seon" target="_blank" rel="noopener noreferrer">
+                    <Github />
+                    <span>Source Repository</span>
+                </a>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
