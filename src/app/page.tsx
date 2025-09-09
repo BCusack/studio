@@ -45,6 +45,14 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
     const whitepaperContent = await getFileContent("Whitepaper.md");
     if (!whitepaperContent) return null;
 
+    // Only attempt generation if an API key is available at runtime
+    if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
+      console.warn(
+        "Skipping homepage generation: missing GEMINI_API_KEY/GOOGLE_API_KEY"
+      );
+      return null;
+    }
+
     const generated = await generateHomepageContent({ whitepaperContent });
 
     // persist to GCS if bucket configured
