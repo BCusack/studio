@@ -1,8 +1,4 @@
 'use server';
-// runtime guard: ensure a GenAI API key is present in server environment
-if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
-  throw new Error('Missing API key: set GEMINI_API_KEY or GOOGLE_API_KEY in your environment');
-}
 /**
  * @fileOverview A flow for generating homepage content from a whitepaper.
  *
