@@ -91,7 +91,7 @@ export default function MainLayout({ files, children }: { files: string[], child
                     strokeLinejoin="round"
                   />
                 </svg>
-              <span className="font-bold font-headline">Seon Explorer</span>
+              <span className="font-bold font-headline">Seon</span>
             </Link>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">

@@ -30,7 +30,7 @@ export default async function Home() {
             />
           </svg>
           <h1 className="text-4xl md:text-5xl font-bold font-headline tracking-tighter">
-            Welcome to Seon Explorer
+            Welcome to Seon
           </h1>
         </div>
         <p className="max-w-3xl text-lg text-muted-foreground">

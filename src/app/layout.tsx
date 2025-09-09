@@ -5,7 +5,7 @@ import MainLayout from '@/components/main-layout';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Seon Explorer',
+  title: 'Seon',
   description: 'Explore Markdown files from GitHub with an AI-powered menu.',
 };
 
