@@ -34,7 +34,7 @@ export default async function Home() {
 
   return (
     <div className="container mx-auto">
-      <div className="flex flex-col items-center justify-center space-y-4 text-center">
+      <div className="flex flex-col items-center justify-center space-y-4 text-center py-16">
         <div className="flex items-center gap-4">
           <svg
             className="size-16 text-primary"
@@ -64,23 +64,19 @@ export default async function Home() {
         </p>
       </div>
 
-      <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="space-y-16 py-12">
         {homepageContent ? homepageContent.sections.map((section, index) => {
           const Icon = iconMap[section.icon] || FileText;
           return (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-headline">
-                  <Icon className="text-primary" />
-                  {section.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {section.content}
+            <section key={index} className="max-w-3xl mx-auto">
+                <div className="flex items-center gap-3">
+                    <Icon className="size-8 text-primary" />
+                    <h2 className="text-3xl font-bold font-headline">{section.title}</h2>
+                </div>
+                <p className="mt-4 text-lg text-muted-foreground">
+                    {section.content}
                 </p>
-              </CardContent>
-            </Card>
+            </section>
           )
         }) : (
           <Card className="md:col-span-2 lg:col-span-3">
@@ -94,7 +90,7 @@ export default async function Home() {
         )}
       </div>
 
-      <Card className="mt-12 max-w-2xl mx-auto">
+      <Card className="mt-12 mb-16 max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-headline">
             <Bot className="text-primary" />
