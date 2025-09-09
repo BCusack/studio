@@ -57,12 +57,12 @@ export default function MainLayout({ files, children }: { files: string[], child
           <ScrollArea className="h-full">
             <SidebarMenu>
               <SidebarMenuItem>
-                <Link href="/" legacyBehavior passHref>
-                  <SidebarMenuButton isActive={pathname === '/'} tooltip="Home">
+                <SidebarMenuButton asChild isActive={pathname === '/'} tooltip="Home">
+                  <Link href="/">
                     <Home />
                     <span>Home</span>
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
 
@@ -73,12 +73,12 @@ export default function MainLayout({ files, children }: { files: string[], child
               <SidebarMenu>
                 {files.map(file => (
                   <SidebarMenuItem key={file}>
-                    <Link href={`/${file}`} legacyBehavior passHref>
-                      <SidebarMenuButton isActive={`/${file}` === pathname} tooltip={getFileName(file)}>
+                    <SidebarMenuButton asChild isActive={`/${file}` === pathname} tooltip={getFileName(file)}>
+                      <Link href={`/${file}`}>
                         <FileText />
                         <span>{getFileName(file)}</span>
-                      </SidebarMenuButton>
-                    </Link>
+                      </Link>
+                    </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>

@@ -79,12 +79,12 @@ export function DynamicMenu({ allFiles }: { allFiles: string[] }) {
         <SidebarMenu>
           {selectedFiles.length > 0 ? selectedFiles.map(file => (
             <SidebarMenuItem key={file}>
-              <Link href={`/${file}`} legacyBehavior passHref>
-                <SidebarMenuButton isActive={`/${file}` === pathname} tooltip={getFileName(file)}>
+              <SidebarMenuButton asChild isActive={`/${file}` === pathname} tooltip={getFileName(file)}>
+                <Link href={`/${file}`}>
                   <FileText />
                   <span>{getFileName(file)}</span>
-                </SidebarMenuButton>
-              </Link>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           )) : (
             <p className="px-2 text-sm text-muted-foreground">No relevant files found.</p>
