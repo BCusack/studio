@@ -8,3 +8,6 @@ runConfig:
 env:
   - variable: FIREBASE_STORAGE_BUCKET
     value: seon-4ac19.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
