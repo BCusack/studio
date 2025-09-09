@@ -132,3 +132,50 @@
     @apply bg-muted;
   }
 }
+
+/* Paper read mode: light grey text, no bold, no accent colors */
+@layer base {
+  .paper-mode {
+    /* Make all color tokens neutral / whiter grey for paper read mode */
+    --foreground: 0 0% 90%; /* lighter (whiter) grey for main text */
+    --muted-foreground: 0 0% 78%;
+    --primary: 0 0% 90%;
+    --primary-foreground: 0 0% 90%;
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 90%;
+  }
+
+  /* Remove bold styling from utility classes and semantic tags */
+  .paper-mode .font-bold,
+  .paper-mode strong,
+  .paper-mode b {
+    font-weight: 400 !important;
+  }
+
+  /* Headings should not be bold and should use neutral color */
+  .paper-mode .markdown-content h1,
+  .paper-mode .markdown-content h2,
+  .paper-mode .markdown-content h3,
+  .paper-mode .markdown-content h4,
+  .paper-mode .markdown-content h5,
+  .paper-mode .markdown-content h6 {
+    font-weight: 400 !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* Links and primary/accent classes become neutral grey */
+  .paper-mode a,
+  .paper-mode .text-primary,
+  .paper-mode .bg-primary,
+  .paper-mode .border-primary {
+    color: hsl(var(--foreground)) !important;
+    background-color: transparent !important;
+    border-color: hsl(var(--foreground)) !important;
+  }
+
+  /* Blockquote border neutralized */
+  .paper-mode .markdown-content blockquote {
+    border-left-color: hsl(var(--foreground)) !important;
+    color: hsl(var(--muted-foreground)) !important;
+  }
+}
