@@ -9,18 +9,9 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { GenerateDynamicMenuInputSchema, GenerateDynamicMenuOutputSchema, GenerateDynamicMenuInput, GenerateDynamicMenuOutput as GenerateDynamicMenuOutput } from '../schemas/dynamic-menu-schema';
+export type {GenerateDynamicMenuInput, GenerateDynamicMenuOutput};
 
-const GenerateDynamicMenuInputSchema = z.object({
-  fileNames: z.array(z.string()).describe('A list of Markdown file names to consider for the menu.'),
-  userQuery: z.string().describe('The user query or context to determine relevant files.'),
-});
-export type GenerateDynamicMenuInput = z.infer<typeof GenerateDynamicMenuInputSchema>;
-
-const GenerateDynamicMenuOutputSchema = z.object({
-  selectedFiles: z.array(z.string()).describe('A list of Markdown file names selected for the menu.'),
-});
-export type GenerateDynamicMenuOutput = z.infer<typeof GenerateDynamicMenuOutputSchema>;
 
 export async function generateDynamicMenu(input: GenerateDynamicMenuInput): Promise<GenerateDynamicMenuOutput> {
   return generateDynamicMenuFlow(input);

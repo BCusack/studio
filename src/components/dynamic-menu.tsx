@@ -2,19 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { generateDynamicMenu } from '@/ai/flows/dynamic-menu-generation';
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import type { GenerateDynamicMenuInput } from '@/ai/schemas/dynamic-menu-schema';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2, FileText, Bot } from 'lucide-react';
+import { Search, Loader2, FileText } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function DynamicMenu({ allFiles }: { allFiles: string[] }) {
   const [query, setQuery] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<string[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const pathname = usePathname();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,11 +25,10 @@ export function DynamicMenu({ allFiles }: { allFiles: string[] }) {
 
     try {
       const result = await generateDynamicMenu({
-        fileNames: allFiles.map(f => f.split('/').pop() || ''), // Send only filenames to the AI
+        fileNames: allFiles.map(f => f.split('/').pop() || ''),
         userQuery: query,
       });
 
-      // The AI returns just filenames; we need to find the full paths from our original list
       const fullPaths = result.selectedFiles.map(selectedName => {
         return allFiles.find(fullPath => (fullPath.split('/').pop() || '') === selectedName);
       }).filter((path): path is string => !!path);
@@ -48,12 +46,8 @@ export function DynamicMenu({ allFiles }: { allFiles: string[] }) {
   const getFileName = (path: string) => path.split('/').pop()?.replace('.md', '') || '';
 
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel className="flex items-center gap-2">
-        <Bot className="size-4" />
-        AI Menu
-      </SidebarGroupLabel>
-      <form onSubmit={handleSubmit} className="px-2 pb-2 space-y-2">
+    <div>
+      <form onSubmit={handleSubmit} className="space-y-2">
         <div className="relative">
           <Input
             placeholder="Search docs with AI..."
@@ -74,23 +68,29 @@ export function DynamicMenu({ allFiles }: { allFiles: string[] }) {
           </Button>
         </div>
       </form>
-      {error && <p className="px-2 text-sm text-destructive">{error}</p>}
+      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       {selectedFiles && (
-        <SidebarMenu>
-          {selectedFiles.length > 0 ? selectedFiles.map(file => (
-            <SidebarMenuItem key={file}>
-              <SidebarMenuButton asChild isActive={`/${file}` === pathname} tooltip={getFileName(file)}>
-                <Link href={`/${file}`}>
-                  <FileText />
-                  <span>{getFileName(file)}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )) : (
-            <p className="px-2 text-sm text-muted-foreground">No relevant files found.</p>
-          )}
-        </SidebarMenu>
+        <Card className="mt-4">
+          <CardContent className="p-4 space-y-2">
+            {selectedFiles.length > 0 ? (
+              <ul className="space-y-1">
+                {selectedFiles.map(file => (
+                  <li key={file}>
+                    <Button variant="link" asChild className="p-0 h-auto">
+                      <Link href={`/${file}`} className="flex items-center gap-2">
+                        <FileText className="size-4" />
+                        <span>{getFileName(file)}</span>
+                      </Link>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">No relevant files found.</p>
+            )}
+          </CardContent>
+        </Card>
       )}
-    </SidebarGroup>
+    </div>
   );
 }
