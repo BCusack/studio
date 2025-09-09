@@ -58,6 +58,9 @@
   },
   "devDependencies": {
     "@types/marked": "^6.0.0",
+    "@types/bunyan": "^1.8.9",
+    "@types/memcached": "^2.2.6",
+    "@types/mysql": "^2.15.21",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

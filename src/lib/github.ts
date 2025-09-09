@@ -9,7 +9,7 @@ const REPO_BRANCH = 'main';
 
 const GITHUB_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 
-const headers = GITHUB_TOKEN
+const headers: Record<string, string> = GITHUB_TOKEN
   ? { Authorization: `Bearer ${GITHUB_TOKEN}` }
   : {};
 
@@ -51,7 +51,7 @@ export async function getRepoFiles(): Promise<string[]> {
       }
     }
   }
-  
+
   return allFiles.sort();
 }
 
@@ -59,12 +59,12 @@ export async function getFileContent(path: string): Promise<string> {
   const url = `${GITHUB_API_URL}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${REPO_BRANCH}`;
 
   try {
-    const response = await fetch(url, { 
+    const response = await fetch(url, {
       headers: { ...headers, Accept: 'application/vnd.github.raw' },
       next: { revalidate: 3600 } // Cache for 1 hour
     });
     if (!response.ok) {
-        notFound();
+      notFound();
     }
     return await response.text();
   } catch (error) {
