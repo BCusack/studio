@@ -189,6 +189,16 @@
     --primary-foreground: 0 0% 12%;
     --accent: 0 0% 98%;
     --accent-foreground: 0 0% 12%;
+    /* Dropdowns, popovers and muted surfaces should follow the paper inverted tokens */
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 12%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 0 0% 12%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 40%;
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
+    --ring: 180 100% 50%;
   }
 
   /* Mirror the paper-mode neutral styling but for inverted tokens */

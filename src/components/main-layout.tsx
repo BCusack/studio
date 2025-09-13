@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import Logo from "./logo";
+import Breadcrumbs from "./breadcrumbs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -265,6 +266,7 @@ export default function MainLayout({
         </div>
       </header>
 
+      <Breadcrumbs files={files} />
       <main className="flex-1">{children}</main>
     </div>
   );
