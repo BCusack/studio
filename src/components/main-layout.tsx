@@ -15,7 +15,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Menu, Github } from "lucide-react";
+import { Menu, Github, Heart } from "lucide-react";
 
 type FileTree = {
   [key: string]: FileTree | string;
@@ -196,6 +196,71 @@ export default function MainLayout({
                 <span className="sr-only">GitHub</span>
               </Button>
             </a>
+            {/* Support dropdown: links to repository support pages. Assumption: sponsor URL follows GitHub Sponsors pattern for the owner. */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" title="Support">
+                  <Heart />
+                  <span className="sr-only">Support</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Support</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="px-3 py-2 flex flex-col gap-2">
+                  <a
+                    href="https://ko-fi.com/W7W31G9CXW"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block"
+                  >
+                    <img
+                      src="https://ko-fi.com/img/githubbutton_sm.svg"
+                      alt="Support on Ko-fi"
+                      width={120}
+                      height={20}
+                    />
+                  </a>
+
+                  <a
+                    href="https://patreon.com/BrianCusack"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block"
+                  >
+                    <img
+                      src="https://img.shields.io/badge/Support-Patreon-orange.svg"
+                      alt="Support on Patreon"
+                      width={120}
+                      height={20}
+                    />
+                  </a>
+
+                  <a
+                    href="https://www.buymeacoffee.com/falcon78"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block"
+                  >
+                    <img
+                      src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"
+                      alt="Buy Me A Coffee"
+                      width={120}
+                      height={20}
+                    />
+                  </a>
+                  <div className="pt-1">
+                    <iframe
+                      src="https://github.com/sponsors/BCusack/button"
+                      title="Sponsor BCusack"
+                      height={32}
+                      width={114}
+                      style={{ border: 0, borderRadius: 6 }}
+                    />
+                  </div>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
