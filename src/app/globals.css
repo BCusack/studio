@@ -178,4 +178,47 @@
     border-left-color: hsl(var(--foreground)) !important;
     color: hsl(var(--muted-foreground)) !important;
   }
+
+  /* Inverted paper mode: darker background with muted pale text for a high-contrast 'paper' look */
+  .paper-mode-inverted {
+    /* Light paper background with dark grey text */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 12%;
+    --muted-foreground: 0 0% 40%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 12%;
+    --accent: 0 0% 98%;
+    --accent-foreground: 0 0% 12%;
+  }
+
+  /* Mirror the paper-mode neutral styling but for inverted tokens */
+  .paper-mode-inverted .font-bold,
+  .paper-mode-inverted strong,
+  .paper-mode-inverted b {
+    font-weight: 400 !important;
+  }
+
+  .paper-mode-inverted .markdown-content h1,
+  .paper-mode-inverted .markdown-content h2,
+  .paper-mode-inverted .markdown-content h3,
+  .paper-mode-inverted .markdown-content h4,
+  .paper-mode-inverted .markdown-content h5,
+  .paper-mode-inverted .markdown-content h6 {
+    font-weight: 400 !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .paper-mode-inverted a,
+  .paper-mode-inverted .text-primary,
+  .paper-mode-inverted .bg-primary,
+  .paper-mode-inverted .border-primary {
+    color: hsl(var(--foreground)) !important;
+    background-color: transparent !important;
+    border-color: hsl(var(--foreground)) !important;
+  }
+
+  .paper-mode-inverted .markdown-content blockquote {
+    border-left-color: hsl(var(--foreground)) !important;
+    color: hsl(var(--muted-foreground)) !important;
+  }
 }

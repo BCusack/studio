@@ -74,22 +74,33 @@ export default function MainLayout({
 }) {
   const fileTree = buildFileTree(files);
 
-  // Paper read mode: persisted in localStorage and toggles the root class
-  const [paperMode, setPaperMode] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem("paper-mode") === "1";
-    } catch (e) {
-      return false;
+  // Paper read mode: persisted in localStorage and toggles a root class.
+  // Modes: 'off' | 'default' | 'inverted'
+  const [paperMode, setPaperMode] = useState<"off" | "default" | "inverted">(
+    () => {
+      try {
+        return (
+          (localStorage.getItem("paper-mode") as
+            | "off"
+            | "default"
+            | "inverted") || "off"
+        );
+      } catch (e) {
+        return "off";
+      }
     }
-  });
+  );
 
   useEffect(() => {
     const root = document.documentElement;
-    if (paperMode) root.classList.add("paper-mode");
-    else root.classList.remove("paper-mode");
+    // clear both possible classes then add the one we need
+    root.classList.remove("paper-mode", "paper-mode-inverted");
+    if (paperMode === "default") root.classList.add("paper-mode");
+    else if (paperMode === "inverted")
+      root.classList.add("paper-mode-inverted");
 
     try {
-      localStorage.setItem("paper-mode", paperMode ? "1" : "0");
+      localStorage.setItem("paper-mode", paperMode);
     } catch (e) {
       /* ignore */
     }
@@ -125,32 +136,55 @@ export default function MainLayout({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              type="button"
-              aria-pressed={paperMode}
-              onClick={() => setPaperMode((s) => !s)}
-              title={
-                paperMode ? "Disable paper read mode" : "Enable paper read mode"
-              }
-            >
-              {/* simple page icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9l7 7v9a2 2 0 0 1-2 2z" />
-              </svg>
-              <span className="sr-only">Toggle paper read mode</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" title="Paper read mode">
+                  {/* simple page icon */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9l7 7v9a2 2 0 0 1-2 2z" />
+                  </svg>
+                  <span className="sr-only">Paper read mode</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Paper read mode</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <button
+                    className="w-full text-right"
+                    onClick={() => setPaperMode("off")}
+                  >
+                    Off
+                  </button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <button
+                    className="w-full text-right"
+                    onClick={() => setPaperMode("default")}
+                  >
+                    Default
+                  </button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <button
+                    className="w-full text-right"
+                    onClick={() => setPaperMode("inverted")}
+                  >
+                    Inverted
+                  </button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <a
               href="https://github.com/BCusack/Seon"
