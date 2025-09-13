@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Metadata } from "next";
 import { Bot, FileText, Globe, Shield, Zap } from "lucide-react";
 import { DynamicMenu } from "@/components/dynamic-menu";
 import { getFileContent, getRepoFiles } from "@/lib/github";
@@ -78,6 +79,13 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
     console.error("Failed to generate homepage content:", error);
     return null;
   }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const homepageContent = await getHomepageContent();
+  return {
+    title: homepageContent?.title || "Seon",
+  };
 }
 
 export default async function Home() {
