@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import Logo from "./logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -100,25 +101,11 @@ export default function MainLayout({
         <div className="mx-auto max-w-5xl flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <svg
+              <Logo
                 className="size-6 text-primary"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M2 7L12 12M22 7L12 12M12 2V12M12 22V12"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                />
-              </svg>
+                ariaHidden={true}
+                strokeWidth={2}
+              />
               <span className="font-bold font-headline">Seon</span>
             </Link>
           </div>

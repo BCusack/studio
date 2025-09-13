@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
 import { ComponentType } from "react";
+import Logo from "@/components/logo";
 
 const iconMap: { [key: string]: ComponentType<{ className?: string }> } = {
   FileText,
@@ -87,25 +88,7 @@ export default async function Home() {
     <div className="mx-auto max-w-5xl px-4">
       <div className="flex flex-col items-center justify-center space-y-4 text-center py-16">
         <div className="flex items-center gap-4">
-          <svg
-            className="size-16 text-primary"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M2 7L12 12M22 7L12 12M12 2V12M12 22V12"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <Logo className="size-16 text-primary" ariaHidden={true} />
           <h1 className="text-4xl md:text-5xl font-bold font-headline tracking-tighter">
             {homepageContent?.title || "Welcome to Seon"}
           </h1>
