@@ -51,6 +51,69 @@ const getCachedRepoFiles = unstable_cache(
   }
 );
 
+// Generate dynamic metadata based on AI-generated content
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const homepageContent = await getCachedHomepageContent();
+
+    const title =
+      homepageContent?.title || "Seon | AI-Powered Documentation Platform";
+    const description =
+      homepageContent?.sections?.[0]?.content ||
+      "Discover and explore documentation with AI-powered navigation. Transform GitHub repositories into intelligent, searchable knowledge bases with dynamic content generation.";
+
+    const keywords = [
+      "AI documentation",
+      "intelligent search",
+      "markdown explorer",
+      "GitHub integration",
+      "knowledge management",
+      "content discovery",
+      ...(homepageContent?.sections?.map((s) => s.title.toLowerCase()) || []),
+    ];
+
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com";
+
+    return {
+      title,
+      description: description.slice(0, 160),
+      keywords,
+      openGraph: {
+        title,
+        description: description.slice(0, 160),
+        url: baseUrl,
+        type: "website",
+        siteName: "Seon",
+        images: [
+          {
+            url: "/og-image.png",
+            width: 1200,
+            height: 630,
+            alt: title,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description: description.slice(0, 160),
+        images: ["/og-image.png"],
+      },
+      alternates: {
+        canonical: "/",
+      },
+    };
+  } catch (error) {
+    // Fallback metadata if anything fails
+    return {
+      title: "Seon | AI-Powered Documentation Platform",
+      description:
+        "Discover and explore documentation with AI-powered navigation.",
+    };
+  }
+}
+
 async function getHomepageContent(): Promise<HomepageContentOutput | null> {
   try {
     const bucketName =
@@ -123,13 +186,6 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
     console.error("Failed to generate homepage content:", error);
     return null;
   }
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  // Use a simpler fallback for metadata to avoid double API calls
-  return {
-    title: "Seon",
-  };
 }
 
 export default async function Home() {

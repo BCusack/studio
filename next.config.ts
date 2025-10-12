@@ -8,9 +8,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Remove output: 'export' to allow Server Actions
-  // output: 'export',
-  // trailingSlash: true,
+  // Removed output: 'export' to enable ISR and other runtime features
+  // This allows Server Actions and dynamic SEO features
+  trailingSlash: false,
   images: {
     unoptimized: true,
     remotePatterns: [
