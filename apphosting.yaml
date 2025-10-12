@@ -11,3 +11,9 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
+buildConfig:
+  commands:
+    - npm ci
+    - npm run build
+  outputDir: out
