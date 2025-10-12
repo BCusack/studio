@@ -20,6 +20,60 @@ const iconMap: { [key: string]: ComponentType<{ className?: string }> } = {
   Bot,
 };
 
+// Generate dynamic metadata based on AI-generated content
+export async function generateMetadata(): Promise<Metadata> {
+  const homepageContent = await getHomepageContent();
+
+  const title =
+    homepageContent?.title || "Seon | AI-Powered Documentation Platform";
+  const description =
+    homepageContent?.sections?.[0]?.content ||
+    "Discover and explore documentation with AI-powered navigation. Transform GitHub repositories into intelligent, searchable knowledge bases with dynamic content generation.";
+
+  const keywords = [
+    "AI documentation",
+    "intelligent search",
+    "markdown explorer",
+    "GitHub integration",
+    "knowledge management",
+    "content discovery",
+    ...(homepageContent?.sections?.map((s) => s.title.toLowerCase()) || []),
+  ];
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com";
+
+  return {
+    title,
+    description: description.slice(0, 160),
+    keywords,
+    openGraph: {
+      title,
+      description: description.slice(0, 160),
+      url: baseUrl,
+      type: "website",
+      siteName: "Seon",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: description.slice(0, 160),
+      images: ["/og-image.png"],
+    },
+    alternates: {
+      canonical: "/",
+    },
+  };
+}
+
 async function getHomepageContent(): Promise<HomepageContentOutput | null> {
   try {
     const bucketName =
@@ -79,13 +133,6 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
     console.error("Failed to generate homepage content:", error);
     return null;
   }
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  const homepageContent = await getHomepageContent();
-  return {
-    title: homepageContent?.title || "Seon",
-  };
 }
 
 export default async function Home() {

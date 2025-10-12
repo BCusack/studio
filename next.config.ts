@@ -8,8 +8,8 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  output: 'export',
-  trailingSlash: true,
+  // Removed output: 'export' to enable ISR and other runtime features
+  trailingSlash: false,
   images: {
     remotePatterns: [
       {
