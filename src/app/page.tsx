@@ -11,6 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
 import { ComponentType } from "react";
 import Logo from "@/components/logo";
+import { unstable_cache } from "next/cache";
+
+// Cache the homepage for 1 hour (3600 seconds)
+export const revalidate = 3600;
+
+// Use ISR instead of force-static to allow for dynamic content when needed
+// export const dynamic = 'force-static';
 
 const iconMap: { [key: string]: ComponentType<{ className?: string }> } = {
   FileText,
@@ -20,58 +27,91 @@ const iconMap: { [key: string]: ComponentType<{ className?: string }> } = {
   Bot,
 };
 
+// Cached version of getHomepageContent with 1 hour cache
+const getCachedHomepageContent = unstable_cache(
+  async (): Promise<HomepageContentOutput | null> => {
+    return getHomepageContent();
+  },
+  ["homepage-content"],
+  {
+    revalidate: 3600, // 1 hour
+    tags: ["homepage"],
+  }
+);
+
+// Cached version of getRepoFiles with 1 hour cache
+const getCachedRepoFiles = unstable_cache(
+  async (): Promise<string[]> => {
+    return getRepoFiles();
+  },
+  ["repo-files"],
+  {
+    revalidate: 3600, // 1 hour
+    tags: ["repo-files"],
+  }
+);
+
 // Generate dynamic metadata based on AI-generated content
 export async function generateMetadata(): Promise<Metadata> {
-  const homepageContent = await getHomepageContent();
+  try {
+    const homepageContent = await getCachedHomepageContent();
 
-  const title =
-    homepageContent?.title || "Seon | AI-Powered Documentation Platform";
-  const description =
-    homepageContent?.sections?.[0]?.content ||
-    "Discover and explore documentation with AI-powered navigation. Transform GitHub repositories into intelligent, searchable knowledge bases with dynamic content generation.";
+    const title =
+      homepageContent?.title || "Seon | AI-Powered Documentation Platform";
+    const description =
+      homepageContent?.sections?.[0]?.content ||
+      "Discover and explore documentation with AI-powered navigation. Transform GitHub repositories into intelligent, searchable knowledge bases with dynamic content generation.";
 
-  const keywords = [
-    "AI documentation",
-    "intelligent search",
-    "markdown explorer",
-    "GitHub integration",
-    "knowledge management",
-    "content discovery",
-    ...(homepageContent?.sections?.map((s) => s.title.toLowerCase()) || []),
-  ];
+    const keywords = [
+      "AI documentation",
+      "intelligent search",
+      "markdown explorer",
+      "GitHub integration",
+      "knowledge management",
+      "content discovery",
+      ...(homepageContent?.sections?.map((s) => s.title.toLowerCase()) || []),
+    ];
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com";
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com";
 
-  return {
-    title,
-    description: description.slice(0, 160),
-    keywords,
-    openGraph: {
+    return {
       title,
       description: description.slice(0, 160),
-      url: baseUrl,
-      type: "website",
-      siteName: "Seon",
-      images: [
-        {
-          url: "/og-image.png",
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description: description.slice(0, 160),
-      images: ["/og-image.png"],
-    },
-    alternates: {
-      canonical: "/",
-    },
-  };
+      keywords,
+      openGraph: {
+        title,
+        description: description.slice(0, 160),
+        url: baseUrl,
+        type: "website",
+        siteName: "Seon",
+        images: [
+          {
+            url: "/og-image.png",
+            width: 1200,
+            height: 630,
+            alt: title,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description: description.slice(0, 160),
+        images: ["/og-image.png"],
+      },
+      alternates: {
+        canonical: "/",
+      },
+    };
+  } catch (error) {
+    // Fallback metadata if anything fails
+    return {
+      title: "Seon | AI-Powered Documentation Platform",
+      description:
+        "Discover and explore documentation with AI-powered navigation.",
+    };
+  }
 }
 
 async function getHomepageContent(): Promise<HomepageContentOutput | null> {
@@ -100,7 +140,20 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
       }
     }
 
-    const whitepaperContent = await getFileContent("Whitepaper.md");
+    // Cache the whitepaper fetch for 1 hour
+    const whitepaperContent = await fetch(
+      "https://api.github.com/repos/BCusack/Seon/contents/Whitepaper.md?ref=main",
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
+          Accept: "application/vnd.github.raw",
+        },
+        next: { revalidate: 3600 },
+      }
+    )
+      .then((res) => (res.ok ? res.text() : null))
+      .catch(() => null);
+
     if (!whitepaperContent) return null;
 
     // Only attempt generation if an API key is available at runtime
@@ -136,8 +189,11 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
 }
 
 export default async function Home() {
-  const files = await getRepoFiles();
-  const homepageContent = await getHomepageContent();
+  // Load both operations in parallel using cached versions
+  const [files, homepageContent] = await Promise.all([
+    getCachedRepoFiles().catch(() => []), // Fallback to empty array if GitHub fails
+    getCachedHomepageContent().catch(() => null), // Fallback to null if content generation fails
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl px-4">
@@ -149,11 +205,8 @@ export default async function Home() {
           </h1>
         </div>
         <p className="max-w-3xl text-lg text-muted-foreground">
-          This page was generated by an AI assistant that analysed the project's{" "}
-          <Link href="/Whitepaper.md" className="text-primary hover:underline">
-            white paper
-          </Link>
-          . Use the AI-powered search below to find what you're looking for.
+          {homepageContent?.sections?.[0]?.content ||
+            "Explore the future of human-computer interaction through our research and development project. Use the AI-powered search below to find what you're looking for."}
         </p>
         <div className="mt-6">
           <Link href="/Whitepaper.md" aria-label="Read the Seon white paper">

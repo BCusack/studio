@@ -11,9 +11,19 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: GITHUB_ACCESS_TOKEN
+    secret: GITHUB_ACCESS_TOKEN
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: GEMINI_API_KEY
+    secret: GEMINI_API_KEY
+    availability:
+      - BUILD
+      - RUNTIME
 
 buildConfig:
   commands:
     - npm ci
     - npm run build
-  outputDir: out
+  outputDir: .next

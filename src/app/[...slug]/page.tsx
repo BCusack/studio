@@ -1,4 +1,4 @@
-import { getFileContent } from "@/lib/github";
+import { getFileContent, getRepoFiles } from "@/lib/github";
 import { marked } from "marked";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -8,6 +8,26 @@ type Props = {
     slug: string[];
   };
 };
+
+export async function generateStaticParams() {
+  try {
+    const files = await getRepoFiles();
+
+    // Convert file paths to slug arrays
+    const params = files
+      .filter((file) => file.endsWith(".md"))
+      .map((file) => {
+        // Remove .md extension and split by /
+        const slug = file.replace(/\.md$/, "").split("/").filter(Boolean);
+        return { slug };
+      });
+
+    return params;
+  } catch (error) {
+    console.error("Error generating static params:", error);
+    return [];
+  }
+}
 
 export default async function MarkdownPage({ params }: Props) {
   const resolvedParams = (await params) as { slug: string[] };
