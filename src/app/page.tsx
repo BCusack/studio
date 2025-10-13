@@ -221,10 +221,13 @@ export default async function Home() {
 
       <div className="space-y-16 py-12">
         {homepageContent ? (
-          homepageContent.sections.map((section, index) => {
+          (homepageContent.sections ?? []).slice(1).map((section, index) => {
             const Icon = iconMap[section.icon] || FileText;
             return (
-              <section key={index} className="max-w-3xl mx-auto px-4">
+              <section
+                key={`${section.title}-${index + 1}`}
+                className="max-w-3xl mx-auto px-4"
+              >
                 <div className="flex items-center gap-3">
                   <Icon className="size-8 text-primary" />
                   <h2 className="text-3xl font-bold font-headline">

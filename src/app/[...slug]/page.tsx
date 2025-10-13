@@ -39,11 +39,39 @@ export default async function MarkdownPage({ params }: Props) {
   const content = await getFileContent(path);
 
   const htmlContent = await marked.parse(content);
+  const decodeEntities = (value: string) =>
+    value
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'");
+
+  const htmlWithAnchors = htmlContent.replace(
+    /<h([1-6])>([\s\S]*?)<\/h\1>/g,
+    (match, level, inner) => {
+      const plain = decodeEntities(inner)
+        .replace(/<[^>]+>/g, "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFKD");
+
+      const cleaned = plain.replace(/[^\w\s-]/g, "");
+      const slug = cleaned.replace(/\s/g, "-").replace(/^-+|-+$/g, "");
+
+      if (!slug) {
+        return match;
+      }
+
+      return `<h${level} id="${slug}">${inner}</h${level}>`;
+    }
+  );
 
   return (
     <article
       className="max-w-4xl mx-auto markdown-content"
-      dangerouslySetInnerHTML={{ __html: htmlContent }}
+      dangerouslySetInnerHTML={{ __html: htmlWithAnchors }}
     />
   );
 }
