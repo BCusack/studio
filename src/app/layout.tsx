@@ -3,7 +3,6 @@ import "./globals.css";
 import { getRepoFiles } from "@/lib/github";
 import MainLayout from "@/components/main-layout";
 import { Toaster } from "@/components/ui/toaster";
-import { RecaptchaProvider } from "@/components/recaptcha-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -140,10 +139,8 @@ export default async function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <RecaptchaProvider>
-          <MainLayout files={files}>{children}</MainLayout>
-          <Toaster />
-        </RecaptchaProvider>
+        <MainLayout files={files}>{children}</MainLayout>
+        <Toaster />
       </body>
     </html>
   );

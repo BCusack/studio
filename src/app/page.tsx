@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Metadata } from "next";
 import { Bot, FileText, Globe, Shield, Zap } from "lucide-react";
 import { ProtectedDynamicMenu } from "@/components/protected-dynamic-menu";
+import { RecaptchaProvider } from "@/components/recaptcha-provider";
 import { getFileContent, getRepoFiles } from "@/lib/github";
 import { generateHomepageContent } from "@/ai/flows/homepage-content-generation";
 import { Storage } from "@google-cloud/storage";
@@ -220,10 +221,13 @@ export default async function Home() {
 
       <div className="space-y-16 py-12">
         {homepageContent ? (
-          homepageContent.sections.map((section, index) => {
+          (homepageContent.sections ?? []).slice(1).map((section, index) => {
             const Icon = iconMap[section.icon] || FileText;
             return (
-              <section key={index} className="max-w-3xl mx-auto px-4">
+              <section
+                key={`${section.title}-${index + 1}`}
+                className="max-w-3xl mx-auto px-4"
+              >
                 <div className="flex items-center gap-3">
                   <Icon className="size-8 text-primary" />
                   <h2 className="text-3xl font-bold font-headline">
@@ -260,7 +264,9 @@ export default async function Home() {
             Leverages a GenAI model to create a dynamic navigation menu based on
             your search query.
           </p>
-          <ProtectedDynamicMenu allFiles={files} />
+          <RecaptchaProvider>
+            <ProtectedDynamicMenu allFiles={files} />
+          </RecaptchaProvider>
         </CardContent>
       </Card>
     </div>
