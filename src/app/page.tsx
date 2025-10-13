@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Metadata } from "next";
 import { Bot, FileText, Globe, Shield, Zap } from "lucide-react";
 import { ProtectedDynamicMenu } from "@/components/protected-dynamic-menu";
+import { RecaptchaProvider } from "@/components/recaptcha-provider";
 import { getFileContent, getRepoFiles } from "@/lib/github";
 import { generateHomepageContent } from "@/ai/flows/homepage-content-generation";
 import { Storage } from "@google-cloud/storage";
@@ -260,7 +261,9 @@ export default async function Home() {
             Leverages a GenAI model to create a dynamic navigation menu based on
             your search query.
           </p>
-          <ProtectedDynamicMenu allFiles={files} />
+          <RecaptchaProvider>
+            <ProtectedDynamicMenu allFiles={files} />
+          </RecaptchaProvider>
         </CardContent>
       </Card>
     </div>
