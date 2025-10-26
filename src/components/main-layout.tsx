@@ -267,7 +267,7 @@ export default function MainLayout({
       </header>
 
       <Breadcrumbs files={files} />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 px-4">{children}</main>
     </div>
   );
 }

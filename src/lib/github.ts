@@ -55,8 +55,8 @@ export async function getRepoFiles(): Promise<string[]> {
     'Project/Planning.md',
     'Project/Market Research.md',
     'Project/Letta/prototyping.md',
-    'Extended/beyond_the_smartphone.md',
-    'Extended/communication_interfacing.md',
+    'Extended/Beyond The Smart Phone.md',
+    'Extended/The Zero UI.md',
     'Wiki/Home.md',
     'CODE_OF_CONDUCT.md',
     'LICENCE.md'

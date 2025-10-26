@@ -103,7 +103,7 @@
     @apply mb-4 leading-relaxed;
   }
   .markdown-content a {
-    @apply text-primary hover:underline;
+    @apply text-primary hover:underline break-all;
   }
   .markdown-content ul,
   .markdown-content ol {

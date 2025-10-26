@@ -197,7 +197,7 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="mx-auto max-w-5xl px-4">
+    <div className="mx-auto max-w-5xl">
       <div className="flex flex-col items-center justify-center space-y-4 text-center py-16">
         <div className="flex items-center gap-4">
           <Logo className="size-16 text-primary" ariaHidden={true} />

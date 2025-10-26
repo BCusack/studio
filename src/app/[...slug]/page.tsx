@@ -31,9 +31,9 @@ export async function generateStaticParams() {
 
 export default async function MarkdownPage({ params }: Props) {
   const resolvedParams = (await params) as { slug: string[] };
-  const path = resolvedParams.slug.join("/");
-  if (!path) {
-    notFound();
+  let path = resolvedParams.slug.join("/");
+  if (!path.endsWith(".md")) {
+    path = `${path}.md`;
   }
 
   const content = await getFileContent(path);
@@ -78,7 +78,10 @@ export default async function MarkdownPage({ params }: Props) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
-  const path = resolvedParams.slug.join("/");
+  let path = resolvedParams.slug.join("/");
+  if (!path.endsWith(".md")) {
+    path = `${path}.md`;
+  }
   const content = await getFileContent(path);
 
   if (!content) {
