@@ -179,6 +179,11 @@
     color: hsl(var(--muted-foreground)) !important;
   }
 
+  .paper-mode img,
+  .paper-mode-inverted img {
+    @apply hidden;
+  }
+
   /* Inverted paper mode: darker background with muted pale text for a high-contrast 'paper' look */
   .paper-mode-inverted {
     /* Light paper background with dark grey text */
