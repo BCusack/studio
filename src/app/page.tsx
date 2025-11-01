@@ -1,9 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Metadata } from "next";
 import { Bot, FileText, Globe, Shield, Zap } from "lucide-react";
-import { ProtectedDynamicMenu } from "@/components/protected-dynamic-menu";
-import { RecaptchaProvider } from "@/components/recaptcha-provider";
-import { getFileContent, getRepoFiles } from "@/lib/github";
 import { generateHomepageContent } from "@/ai/flows/homepage-content-generation";
 import { Storage } from "@google-cloud/storage";
 import type { HomepageContentOutput } from "@/ai/schemas/homepage-content-schema";
@@ -37,18 +34,6 @@ const getCachedHomepageContent = unstable_cache(
   {
     revalidate: 3600, // 1 hour
     tags: ["homepage"],
-  }
-);
-
-// Cached version of getRepoFiles with 1 hour cache
-const getCachedRepoFiles = unstable_cache(
-  async (): Promise<string[]> => {
-    return getRepoFiles();
-  },
-  ["repo-files"],
-  {
-    revalidate: 3600, // 1 hour
-    tags: ["repo-files"],
   }
 );
 
@@ -190,11 +175,10 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
 }
 
 export default async function Home() {
-  // Load both operations in parallel using cached versions
-  const [files, homepageContent] = await Promise.all([
-    getCachedRepoFiles().catch(() => []), // Fallback to empty array if GitHub fails
-    getCachedHomepageContent().catch(() => null), // Fallback to null if content generation fails
-  ]);
+  const homepageContent = await getCachedHomepageContent().catch(() => null);
+  const sections = (homepageContent?.sections ?? []).slice(
+    1
+  ) as HomepageContentOutput["sections"];
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -207,7 +191,7 @@ export default async function Home() {
         </div>
         <p className="max-w-3xl text-lg text-muted-foreground">
           {homepageContent?.sections?.[0]?.content ||
-            "Explore the future of human-computer interaction through our research and development project. Use the AI-powered search below to find what you're looking for."}
+            "Explore the future of human-computer interaction through our research and development project. Browse the documentation and discover the vision behind Seon."}
         </p>
         <div className="mt-6">
           <Link href="/Whitepaper.md" aria-label="Read the Seon white paper">
@@ -221,7 +205,7 @@ export default async function Home() {
 
       <div className="space-y-16 py-12">
         {homepageContent ? (
-          (homepageContent.sections ?? []).slice(1).map((section, index) => {
+          sections.map((section, index) => {
             const Icon = iconMap[section.icon] || FileText;
             return (
               <section
@@ -251,24 +235,6 @@ export default async function Home() {
           </Card>
         )}
       </div>
-
-      <Card className="mt-12 mb-16 max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-headline">
-            <Bot className="text-primary" />
-            AI-Powered Search
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-4">
-            Leverages a GenAI model to create a dynamic navigation menu based on
-            your search query.
-          </p>
-          <RecaptchaProvider>
-            <ProtectedDynamicMenu allFiles={files} />
-          </RecaptchaProvider>
-        </CardContent>
-      </Card>
     </div>
   );
 }
