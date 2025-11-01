@@ -1,6 +1,34 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        destination: 'https://theseonproject.com/:path*',
+        permanent: true,
+        has: [
+          {
+            type: 'host',
+            value: 'www.theseonproject.com',
+          },
+        ],
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+        ],
+      },
+    ];
+  },
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
