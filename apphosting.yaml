@@ -31,6 +31,16 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: NEXT_PUBLIC_GOOGLE_ANALYTICS
+    secret: NEXT_PUBLIC_GOOGLE_ANALYTICS
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_BASE_URL
+    secret: NEXT_PUBLIC_BASE_URL
+    availability:
+      - BUILD
+      - RUNTIME
 
 buildConfig:
   commands:
