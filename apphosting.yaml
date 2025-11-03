@@ -32,12 +32,12 @@ env:
       - BUILD
       - RUNTIME
   - variable: NEXT_PUBLIC_GOOGLE_ANALYTICS
-    secret: NEXT_PUBLIC_GOOGLE_ANALYTICS
+    value: G-K1DXS8766T
     availability:
       - BUILD
       - RUNTIME
   - variable: NEXT_PUBLIC_BASE_URL
-    secret: NEXT_PUBLIC_BASE_URL
+    value: https://theseonproject.com
     availability:
       - BUILD
       - RUNTIME
