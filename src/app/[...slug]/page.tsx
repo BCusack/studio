@@ -1,4 +1,5 @@
 import { getFileContent, getRepoFiles } from "@/lib/github";
+import { isHiddenMarkdownPath } from "@/lib/content-filters";
 import { marked } from "marked";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -34,6 +35,10 @@ export default async function MarkdownPage({ params }: Props) {
   let path = resolvedParams.slug.join("/");
   if (!path.endsWith(".md")) {
     path = `${path}.md`;
+  }
+
+  if (isHiddenMarkdownPath(path)) {
+    notFound();
   }
 
   const content = await getFileContent(path);
@@ -81,6 +86,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   let path = resolvedParams.slug.join("/");
   if (!path.endsWith(".md")) {
     path = `${path}.md`;
+  }
+  if (isHiddenMarkdownPath(path)) {
+    return {
+      title: "Page Not Found",
+      description: "The requested page could not be found.",
+    };
   }
   const content = await getFileContent(path);
 
