@@ -3,6 +3,7 @@ import "./globals.css";
 import { getRepoFiles } from "@/lib/github";
 import MainLayout from "@/components/main-layout";
 import { Toaster } from "@/components/ui/toaster";
+import CookieConsent from "@/components/cookie-consent";
 
 export const metadata: Metadata = {
   title: {
@@ -137,30 +138,47 @@ export default async function RootLayout({
             }),
           }}
         />
-        {/* Google Analytics */}
-        {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}`}
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS}', {
-                    page_path: window.location.pathname,
-                  });
-                `,
-              }}
-            />
-          </>
-        ) : null}
+        {/* Consent Mode v2 - default denied, before any analytics */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);} window.gtag = gtag;
+                gtag('consent','default',{
+                  'analytics_storage':'denied',
+                  'ad_storage':'denied',
+                  'ad_user_data':'denied',
+                  'ad_personalization':'denied'
+                });
+                try {
+                  var id='${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ?? ""}';
+                  var c=localStorage.getItem('cookie-consent');
+                  if (id && c==='accepted') {
+                    var s=document.createElement('script');
+                    s.async=1; s.src='https://www.googletagmanager.com/gtag/js?id='+id;
+                    s.onload=function(){
+                      gtag('js', new Date());
+                      gtag('config', id, { anonymize_ip: true });
+                      gtag('consent','update',{
+                        'analytics_storage':'granted',
+                        'ad_storage':'granted',
+                        'ad_user_data':'granted',
+                        'ad_personalization':'granted'
+                      });
+                    };
+                    document.head.appendChild(s);
+                  }
+                } catch(e){}
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="font-body antialiased">
         <MainLayout files={files}>{children}</MainLayout>
+        {/* Cookie consent banner and client-side consent handling */}
+        <CookieConsent />
         <Toaster />
       </body>
     </html>
