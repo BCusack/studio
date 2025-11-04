@@ -12,17 +12,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             file.endsWith('.md') || file.endsWith('.mdx')
         )
 
-        const fileEntries: MetadataRoute.Sitemap = markdownFiles.map(file => {
-            // Remove .md extension and convert to URL path
-            const path = file.replace(/\.(md|mdx)$/, '')
+        const fileEntries: MetadataRoute.Sitemap = markdownFiles
+            .map(file => {
+                // Remove extension and convert to URL path
+                const rawPath = file.replace(/\.(md|mdx)$/, '')
 
-            return {
-                url: `${baseUrl}/${path}`,
-                lastModified: new Date(),
-                changeFrequency: 'weekly' as const,
-                priority: path === 'README' ? 0.9 : 0.7,
-            }
-        })
+                // Skip root README as homepage is added separately
+                if (rawPath.toLowerCase() === 'readme') return null
+
+                // Encode each path segment for valid URLs
+                const encodedPath = rawPath
+                    .split('/')
+                    .map(encodeURIComponent)
+                    .join('/')
+
+                return {
+                    url: `${baseUrl}/${encodedPath}`,
+                    lastModified: new Date(),
+                    changeFrequency: 'weekly' as const,
+                    priority: 0.7,
+                }
+            })
+            .filter((e): e is NonNullable<typeof e> => Boolean(e))
 
         // Add homepage and other static routes
         const staticEntries: MetadataRoute.Sitemap = [

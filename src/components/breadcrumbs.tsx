@@ -58,6 +58,40 @@ export default function Breadcrumbs({ files }: Props) {
           );
         })}
       </ol>
+
+      {/* JSON-LD BreadcrumbList for rich results */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: (() => {
+            try {
+              const origin =
+                typeof window !== "undefined" ? window.location.origin : "";
+              const itemListElements = [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: `${origin}/`,
+                },
+                ...parts.map((part, idx) => ({
+                  "@type": "ListItem",
+                  position: idx + 2,
+                  name: decodeURIComponent(part).replace(/[-_]/g, " "),
+                  item: `${origin}/${parts.slice(0, idx + 1).join("/")}`,
+                })),
+              ];
+              return JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                itemListElement: itemListElements,
+              });
+            } catch {
+              return "";
+            }
+          })(),
+        }}
+      />
     </nav>
   );
 }

@@ -130,9 +130,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         .slice(0, 160) + (contentLines[0].length > 160 ? "..." : "");
   }
 
-  // Fallback description
+  // Fallback description aligned with site positioning
   if (!description) {
-    description = `Explore ${title} - comprehensive documentation and insights powered by AI.`;
+    description = `Explore ${title} — insights on AI companions, Zero UI, and the future of human–AI interfaces.`;
   }
 
   const baseUrl =
