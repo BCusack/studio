@@ -4,24 +4,25 @@ import { getRepoFiles } from "@/lib/github";
 import MainLayout from "@/components/main-layout";
 import { Toaster } from "@/components/ui/toaster";
 import CookieConsent from "@/components/cookie-consent";
+import GA4Reporter from "@/components/ga4-reporter";
 
 export const metadata: Metadata = {
   title: {
-    default: "Seon | AI-Powered Documentation Platform",
+    default: "Seon | AI Companions, Zero UI, Future of AI",
     template: "%s | Seon",
   },
   description:
-    "Discover and explore documentation with AI-powered navigation. Seon transforms GitHub repositories into intelligent, searchable knowledge bases with dynamic content generation.",
+    "Explore AI companions, Zero UI, and the future of human–AI interactions. The Seon is focused on ambient, agentic experiences that make software feel conversational and invisible.",
   keywords: [
-    "documentation",
-    "AI",
-    "markdown",
-    "github",
-    "knowledge base",
-    "content management",
-    "artificial intelligence",
-    "developer tools",
-    "technical documentation",
+    "AI companions",
+    "Zero UI",
+    "ambient AI",
+    "agentic interfaces",
+    "conversational UI",
+    "AI UX",
+    "human–AI interaction",
+    "HCI",
+    "future of AI",
   ],
   authors: [{ name: "Seon" }],
   creator: "Seon",
@@ -41,26 +42,25 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    title: "Seon | AI-Powered Documentation Platform",
+    title: "Seon | AI Companions, Zero UI, Future of AI",
     description:
-      "Discover and explore documentation with AI-powered navigation. Transform GitHub repositories into intelligent, searchable knowledge bases.",
+      "Explore AI companions, Zero UI, and the future of human–AI interactions. The Seon is focused on ambient, agentic experiences that make software feel conversational and invisible.",
     siteName: "Seon",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Seon - AI-Powered Documentation Platform",
+        alt: "Seon – AI Companions and Zero UI",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Seon | AI-Powered Documentation Platform",
+    title: "Seon | AI Companions, Zero UI, Future of AI",
     description:
-      "Discover and explore documentation with AI-powered navigation. Transform GitHub repositories into intelligent knowledge bases.",
+      "Explore AI companions, Zero UI, and the future of human–AI interactions. The Seon is focused on ambient, agentic experiences that make software feel conversational and invisible.",
     images: ["/og-image.png"],
-    creator: "@seon",
   },
   robots: {
     index: true,
@@ -114,7 +114,8 @@ export default async function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "Seon",
-              description: "AI-Powered Documentation Platform",
+              description:
+                "AI companions, Zero UI, and the future of human–AI interfaces.",
               url:
                 process.env.NEXT_PUBLIC_BASE_URL ||
                 "https://theseonproject.com",
@@ -125,15 +126,22 @@ export default async function RootLayout({
                   urlTemplate: `${
                     process.env.NEXT_PUBLIC_BASE_URL ||
                     "https://theseonproject.com"
-                  }/search?q={search_term_string}`,
+                  }/?q={search_term_string}`,
                 },
                 "query-input": "required name=search_term_string",
               },
               publisher: {
                 "@type": "Organization",
                 name: "Seon",
+                url:
+                  process.env.NEXT_PUBLIC_BASE_URL ||
+                  "https://theseonproject.com",
+                logo: `${
+                  process.env.NEXT_PUBLIC_BASE_URL ||
+                  "https://theseonproject.com"
+                }/og-image.png`,
                 description:
-                  "AI-powered documentation and knowledge management platform",
+                  "Exploring AI companions, Zero UI, and ambient agentic experiences.",
               },
             }),
           }}
@@ -179,6 +187,8 @@ export default async function RootLayout({
         <MainLayout files={files}>{children}</MainLayout>
         {/* Cookie consent banner and client-side consent handling */}
         <CookieConsent />
+        {/* Report page views on client-side route changes after consent */}
+        <GA4Reporter />
         <Toaster />
       </body>
     </html>

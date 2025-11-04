@@ -41,6 +41,11 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  - variable: GOOGLE_SITE_VERIFICATION
+    value: F08LgrZPo1-1mMTMj3ptGPhCPEmzcq0MmYlS1jGC4Qo
+    availability:
+      - BUILD
+      - RUNTIME
 
 buildConfig:
   commands:

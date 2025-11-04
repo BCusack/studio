@@ -67,3 +67,17 @@ export function setDefaultDeniedConsentEarly() {
         ad_personalization: "denied",
     });
 }
+
+// Send a GA4 page_view event on client-side navigations
+export function trackPageView(path: string, title?: string) {
+    if (typeof window === "undefined") return;
+    ensureGtagGlobal();
+    try {
+        window.gtag("event", "page_view", {
+            page_path: path,
+            page_title: title ?? (typeof document !== 'undefined' ? document.title : undefined),
+        });
+    } catch {
+        // no-op
+    }
+}

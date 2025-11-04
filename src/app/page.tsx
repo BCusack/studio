@@ -43,18 +43,19 @@ export async function generateMetadata(): Promise<Metadata> {
     const homepageContent = await getCachedHomepageContent();
 
     const title =
-      homepageContent?.title || "Seon | AI-Powered Documentation Platform";
+      homepageContent?.title || "Seon | AI Companions, Zero UI, Future of AI";
     const description =
       homepageContent?.sections?.[0]?.content ||
-      "Discover and explore documentation with AI-powered navigation. Transform GitHub repositories into intelligent, searchable knowledge bases with dynamic content generation.";
+      "Explore AI companions, Zero UI, and the future of human–AI interfaces. Ambient, agentic experiences that make software conversational and invisible.";
 
     const keywords = [
-      "AI documentation",
-      "intelligent search",
-      "markdown explorer",
-      "GitHub integration",
-      "knowledge management",
-      "content discovery",
+      "AI companions",
+      "Zero UI",
+      "ambient AI",
+      "agentic interfaces",
+      "conversational UI",
+      "AI UX",
+      "human–AI interaction",
       ...(homepageContent?.sections?.map((s) => s.title.toLowerCase()) || []),
     ];
 
