@@ -1,6 +1,7 @@
 'use server';
 
 import { notFound } from "next/navigation";
+import { isHiddenMarkdownPath } from "@/lib/content-filters";
 
 const GITHUB_API_URL = 'https://api.github.com';
 const REPO_OWNER = 'BCusack';
@@ -73,12 +74,14 @@ export async function getRepoFiles(): Promise<string[]> {
     // If we got empty array due to rate limit, use fallback
     if (contents.length === 0 && currentPath === '') {
       console.warn('Using fallback file list due to GitHub API issues');
-      return fallbackFiles;
+      return fallbackFiles.filter((p) => !isHiddenMarkdownPath(p)).sort();
     }
 
     for (const item of contents) {
       if (item.type === 'file' && item.name.endsWith('.md')) {
-        allFiles.push(item.path);
+        if (!isHiddenMarkdownPath(item.path)) {
+          allFiles.push(item.path);
+        }
       } else if (item.type === 'dir') {
         directoriesToProcess.push(item.path);
       }
