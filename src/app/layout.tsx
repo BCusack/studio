@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { getRepoFiles } from "@/lib/github";
 import MainLayout from "@/components/main-layout";
@@ -186,7 +187,9 @@ export default async function RootLayout({
         {/* Cookie consent banner and client-side consent handling */}
         <CookieConsent />
         {/* Report page views on client-side route changes after consent */}
-        <GA4Reporter />
+        <Suspense fallback={null}>
+          <GA4Reporter />
+        </Suspense>
         <Toaster />
       </body>
     </html>
