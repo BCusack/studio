@@ -32,7 +32,7 @@ export function DynamicMenu({ allFiles }: { allFiles: string[] }) {
       const fullPaths = result.selectedFiles.map(selectedName => {
         return allFiles.find(fullPath => (fullPath.split('/').pop() || '') === selectedName);
       }).filter((path): path is string => !!path);
-      
+
       setSelectedFiles(fullPaths);
 
     } catch (err) {
@@ -77,7 +77,7 @@ export function DynamicMenu({ allFiles }: { allFiles: string[] }) {
                 {selectedFiles.map(file => (
                   <li key={file}>
                     <Button variant="link" asChild className="p-0 h-auto">
-                      <Link href={`/${file}`} className="flex items-center gap-2">
+                      <Link href={`/${file.replace(/\.md$/, '')}`} className="flex items-center gap-2">
                         <FileText className="size-4" />
                         <span>{getFileName(file)}</span>
                       </Link>

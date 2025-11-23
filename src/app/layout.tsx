@@ -88,7 +88,7 @@ export default async function RootLayout({
   const files = await getRepoFiles();
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         {/* Favicon for browser tab */}
         <link rel="icon" href="/favicon.ico" />
@@ -123,10 +123,9 @@ export default async function RootLayout({
                 "@type": "SearchAction",
                 target: {
                   "@type": "EntryPoint",
-                  urlTemplate: `${
-                    process.env.NEXT_PUBLIC_BASE_URL ||
+                  urlTemplate: `${process.env.NEXT_PUBLIC_BASE_URL ||
                     "https://theseonproject.com"
-                  }/?q={search_term_string}`,
+                    }/?q={search_term_string}`,
                 },
                 "query-input": "required name=search_term_string",
               },
@@ -136,10 +135,9 @@ export default async function RootLayout({
                 url:
                   process.env.NEXT_PUBLIC_BASE_URL ||
                   "https://theseonproject.com",
-                logo: `${
-                  process.env.NEXT_PUBLIC_BASE_URL ||
+                logo: `${process.env.NEXT_PUBLIC_BASE_URL ||
                   "https://theseonproject.com"
-                }/og-image.png`,
+                  }/og-image.png`,
                 description:
                   "Exploring AI companions, Zero UI, and ambient agentic experiences.",
               },
