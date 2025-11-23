@@ -25,12 +25,12 @@ interface SearchResult {
 interface SearchError {
   error: string;
   type:
-    | "validation"
-    | "rate_limit"
-    | "duplicate"
-    | "security"
-    | "ai_error"
-    | "server_error";
+  | "validation"
+  | "rate_limit"
+  | "duplicate"
+  | "security"
+  | "ai_error"
+  | "server_error";
   resetTime?: number;
   isBlocked?: boolean;
 }
@@ -257,7 +257,7 @@ export function ProtectedDynamicMenu({ allFiles }: { allFiles: string[] }) {
                   <li key={file}>
                     <Button variant="link" asChild className="p-0 h-auto">
                       <Link
-                        href={`/${file}`}
+                        href={`/${file.replace(/\.md$/, '')}`}
                         className="flex items-center gap-2"
                       >
                         <FileText className="size-4" />

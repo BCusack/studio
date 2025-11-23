@@ -48,7 +48,7 @@ const renderDropdownTree = (tree: FileTree): React.ReactNode[] => {
       if (typeof content === "string") {
         return (
           <DropdownMenuItem key={content} asChild>
-            <Link href={`/${content}`}>{fileName}</Link>
+            <Link href={`/${content.replace(/\.md$/, "")}`}>{fileName}</Link>
           </DropdownMenuItem>
         );
       } else {

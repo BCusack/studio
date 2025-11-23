@@ -5,9 +5,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 type Props = {
-  params: {
+  params: Promise<{
     slug: string[];
-  };
+  }>;
 };
 
 export async function generateStaticParams() {

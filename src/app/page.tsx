@@ -195,7 +195,7 @@ export default async function Home() {
             "Explore the future of human-computer interaction through our research and development project. Browse the documentation and discover the vision behind Seon."}
         </p>
         <div className="mt-6">
-          <Link href="/Whitepaper.md" aria-label="Read the Seon white paper">
+          <Link href="/Whitepaper" aria-label="Read the Seon white paper">
             <Button variant="inverted" size="lg" className="w-full md:w-auto">
               <Github />
               Read the Seon white paper
