@@ -33,9 +33,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   // Removed output: 'export' to enable ISR and other runtime features
   // This allows Server Actions and dynamic SEO features
   trailingSlash: false,
