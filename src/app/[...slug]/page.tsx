@@ -7,7 +7,12 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 marked.use(
-  markedKatex({ throwOnError: false, output: "html", nonStandard: true }),
+  markedKatex({
+    throwOnError: false,
+    output: "html",
+    nonStandard: true,
+    strict: "ignore",
+  }),
 );
 
 type Props = {
