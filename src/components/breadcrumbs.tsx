@@ -66,7 +66,7 @@ export default function Breadcrumbs({ files }: Props) {
           __html: (() => {
             try {
               const origin =
-                typeof window !== "undefined" ? window.location.origin : "";
+                process.env.NEXT_PUBLIC_BASE_URL || "";
               const itemListElements = [
                 {
                   "@type": "ListItem",
