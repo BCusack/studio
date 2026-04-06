@@ -27,7 +27,7 @@ The homepage should have a main title and a few sections that highlight the key 
 Available icons: FileText, Zap, Shield, Globe. Choose the most appropriate icon for each section.
 
 Whitepaper Content:
-{{{whitepaperContent}}}
+{{whitepaperContent}}
 
 Generate the homepage content based on this whitepaper. Ensure the output is a JSON object matching the specified schema.
 `,

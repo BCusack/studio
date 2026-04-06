@@ -2,6 +2,7 @@ declare global {
     interface Window {
         dataLayer: unknown[];
         gtag: (...args: any[]) => void;
+        openCookieSettings?: () => void;
     }
 }
 
@@ -29,6 +30,7 @@ export function updateGtagConsent(granted: boolean) {
 
 export function loadGAScript(measurementId: string): Promise<void> {
     if (typeof window === "undefined") return Promise.resolve();
+    if (!/^G-[A-Z0-9]+$/i.test(measurementId)) return Promise.resolve();
     ensureGtagGlobal();
 
     // Avoid duplicate injection

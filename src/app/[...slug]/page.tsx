@@ -1,6 +1,7 @@
 import { getFileContent, getRepoFiles } from "@/lib/github";
 import { isHiddenMarkdownPath } from "@/lib/content-filters";
 import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -32,6 +33,12 @@ export async function generateStaticParams() {
 
 export default async function MarkdownPage({ params }: Props) {
   const resolvedParams = (await params) as { slug: string[] };
+  // Reject path traversal attempts before any further processing
+  if (
+    resolvedParams.slug.some((segment) => segment === ".." || segment === ".")
+  ) {
+    notFound();
+  }
   let path = resolvedParams.slug.join("/");
   if (!path.endsWith(".md")) {
     path = `${path}.md`;
@@ -70,13 +77,68 @@ export default async function MarkdownPage({ params }: Props) {
       }
 
       return `<h${level} id="${slug}">${inner}</h${level}>`;
-    }
+    },
   );
+
+  const sanitized = sanitizeHtml(htmlWithAnchors, {
+    allowedTags: [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "blockquote",
+      "p",
+      "a",
+      "ul",
+      "ol",
+      "li",
+      "b",
+      "i",
+      "strong",
+      "em",
+      "strike",
+      "del",
+      "ins",
+      "s",
+      "code",
+      "pre",
+      "hr",
+      "br",
+      "div",
+      "span",
+      "table",
+      "thead",
+      "tbody",
+      "tr",
+      "th",
+      "td",
+      "img",
+      "figure",
+      "figcaption",
+      "details",
+      "summary",
+      "sup",
+      "sub",
+    ],
+    allowedAttributes: {
+      a: ["href", "name", "target", "rel"],
+      img: ["src", "alt", "title", "width", "height", "loading"],
+      code: ["class"],
+      pre: ["class"],
+      span: ["class"],
+      div: ["class"],
+      "*": ["id"],
+    },
+    allowedSchemes: ["https", "http", "mailto"],
+    allowProtocolRelative: false,
+  });
 
   return (
     <article
       className="max-w-4xl mx-auto markdown-content"
-      dangerouslySetInnerHTML={{ __html: htmlWithAnchors }}
+      dangerouslySetInnerHTML={{ __html: sanitized }}
     />
   );
 }
@@ -119,7 +181,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       !line.startsWith("#") &&
       !line.startsWith("```") &&
       !line.startsWith("---") &&
-      line.trim().length > 20
+      line.trim().length > 20,
   );
 
   if (contentLines.length > 0) {

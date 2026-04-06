@@ -52,7 +52,7 @@ export default function CookieConsent() {
 
   // Expose a simple global to reopen settings
   useEffect(() => {
-    (window as any).openCookieSettings = () => setVisible(true);
+    window.openCookieSettings = () => setVisible(true);
   }, []);
 
   // If the user had previously accepted and GA_ID exists, ensure GA loads once
@@ -91,7 +91,7 @@ export default function CookieConsent() {
           <div className="mt-2 text-xs text-muted-foreground">
             <button
               className="underline hover:text-foreground"
-              onClick={() => (window as any).openCookieSettings?.()}
+              onClick={() => window.openCookieSettings?.()}
             >
               Cookie settings
             </button>

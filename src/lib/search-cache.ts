@@ -2,7 +2,6 @@
  * Caching utilities for AI search results
  */
 
-import { unstable_cache } from 'next/cache';
 import type { GenerateDynamicMenuInput, GenerateDynamicMenuOutput } from '@/ai/schemas/dynamic-menu-schema';
 
 interface CacheEntry {
@@ -91,16 +90,3 @@ const searchCache = new SearchResultCache();
 setInterval(() => searchCache.cleanup(), 30 * 60 * 1000);
 
 export { searchCache };
-
-// Cached version of the dynamic menu generation with Next.js cache
-export const getCachedDynamicMenu = unstable_cache(
-    async (input: GenerateDynamicMenuInput): Promise<GenerateDynamicMenuOutput> => {
-        // This will be replaced with the actual API call in the route handler
-        throw new Error('This should not be called directly');
-    },
-    ['dynamic-menu'],
-    {
-        revalidate: 3600, // 1 hour
-        tags: ['ai-search'],
-    }
-);

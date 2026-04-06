@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,12 +24,12 @@ interface SearchResult {
 interface SearchError {
   error: string;
   type:
-  | "validation"
-  | "rate_limit"
-  | "duplicate"
-  | "security"
-  | "ai_error"
-  | "server_error";
+    | "validation"
+    | "rate_limit"
+    | "duplicate"
+    | "security"
+    | "ai_error"
+    | "server_error";
   resetTime?: number;
   isBlocked?: boolean;
 }
@@ -44,7 +43,6 @@ export function ProtectedDynamicMenu({ allFiles }: { allFiles: string[] }) {
   const [lastSearchTime, setLastSearchTime] = useState<number>(0);
   const [cooldownTime, setCooldownTime] = useState<number>(0);
 
-  const { executeRecaptcha } = useGoogleReCaptcha();
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Client-side rate limiting (1 request per 3 seconds)
@@ -73,7 +71,7 @@ export function ProtectedDynamicMenu({ allFiles }: { allFiles: string[] }) {
         setCooldownTime(remainingCooldown);
         setError({
           error: `Please wait ${Math.ceil(
-            remainingCooldown / 1000
+            remainingCooldown / 1000,
           )} seconds before searching again.`,
           type: "rate_limit",
         });
@@ -93,18 +91,6 @@ export function ProtectedDynamicMenu({ allFiles }: { allFiles: string[] }) {
       abortControllerRef.current = new AbortController();
 
       try {
-        let recaptchaToken: string | undefined;
-
-        // Execute reCAPTCHA if available
-        if (executeRecaptcha) {
-          try {
-            recaptchaToken = await executeRecaptcha("ai_search");
-          } catch (recaptchaError) {
-            console.warn("reCAPTCHA execution failed:", recaptchaError);
-            // Continue without reCAPTCHA token
-          }
-        }
-
         const response = await fetch("/api/ai-search", {
           method: "POST",
           headers: {
@@ -113,7 +99,6 @@ export function ProtectedDynamicMenu({ allFiles }: { allFiles: string[] }) {
           body: JSON.stringify({
             query: query.trim(),
             fileNames: allFiles.map((f) => f.split("/").pop() || ""),
-            recaptchaToken,
           }),
           signal: abortControllerRef.current.signal,
         });
@@ -141,7 +126,7 @@ export function ProtectedDynamicMenu({ allFiles }: { allFiles: string[] }) {
         const fullPaths = result.selectedFiles
           .map((selectedName) => {
             return allFiles.find(
-              (fullPath) => (fullPath.split("/").pop() || "") === selectedName
+              (fullPath) => (fullPath.split("/").pop() || "") === selectedName,
             );
           })
           .filter((path): path is string => !!path);
@@ -164,7 +149,7 @@ export function ProtectedDynamicMenu({ allFiles }: { allFiles: string[] }) {
         abortControllerRef.current = null;
       }
     },
-    [query, allFiles, executeRecaptcha, isLoading, lastSearchTime]
+    [query, allFiles, isLoading, lastSearchTime],
   );
 
   const getFileName = (path: string) =>
@@ -257,7 +242,7 @@ export function ProtectedDynamicMenu({ allFiles }: { allFiles: string[] }) {
                   <li key={file}>
                     <Button variant="link" asChild className="p-0 h-auto">
                       <Link
-                        href={`/${file.replace(/\.md$/, '')}`}
+                        href={`/${file.replace(/\.md$/, "")}`}
                         className="flex items-center gap-2"
                       >
                         <FileText className="size-4" />

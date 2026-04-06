@@ -94,23 +94,28 @@ export async function getRepoFiles(): Promise<string[]> {
 export async function getFileContent(path: string): Promise<string> {
   const url = `${GITHUB_API_URL}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${REPO_BRANCH}`;
 
+  // Only the network call is in try/catch so that notFound() (which throws
+  // a Next.js internal error) is never accidentally swallowed.
+  let response: Response;
   try {
-    const response = await fetch(url, {
+    response = await fetch(url, {
       headers: { ...headers, Accept: 'application/vnd.github.raw' },
-      next: { revalidate: 3600 } // Cache for 1 hour
+      next: { revalidate: 3600 }, // Cache for 1 hour
     });
-    if (!response.ok) {
-      if (response.status === 403) {
-        console.warn(`GitHub API rate limit exceeded for file: ${path}`);
-      }
-      if (response.status === 401) {
-        console.warn(`GitHub API authentication failed for file: ${path}. Check your GITHUB_ACCESS_TOKEN.`);
-      }
-      notFound();
-    }
-    return await response.text();
   } catch (error) {
     console.error(`Error in getFileContent for ${path}:`, error);
     notFound();
   }
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      console.warn(`GitHub API rate limit exceeded for file: ${path}`);
+    }
+    if (response.status === 401) {
+      console.warn(`GitHub API authentication failed for file: ${path}. Check your GITHUB_ACCESS_TOKEN.`);
+    }
+    notFound();
+  }
+
+  return await response.text();
 }

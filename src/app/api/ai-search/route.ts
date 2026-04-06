@@ -25,37 +25,10 @@ setInterval(() => {
     }
 }, 10 * 60 * 1000);
 
-async function verifyRecaptcha(token: string): Promise<{ success: boolean; score?: number }> {
-    if (!process.env.RECAPTCHA_SECRET_KEY) {
-        console.warn('RECAPTCHA_SECRET_KEY not configured, skipping verification');
-        return { success: true };
-    }
-
-    try {
-        const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                secret: process.env.RECAPTCHA_SECRET_KEY,
-                response: token,
-            }),
-        });
-
-        const result = await response.json();
-        return {
-            success: result.success && result.score >= 0.5, // Require score >= 0.5
-            score: result.score,
-        };
-    } catch (error) {
-        console.error('reCAPTCHA verification failed:', error);
-        return { success: false };
-    }
-}
-
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { query, fileNames, recaptchaToken } = body;
+        const { query, fileNames } = body;
 
         // Get client identifier
         const clientId = getClientIdentifier(request);
@@ -105,19 +78,6 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Verify reCAPTCHA if token provided
-        if (recaptchaToken) {
-            const recaptchaResult = await verifyRecaptcha(recaptchaToken);
-            if (!recaptchaResult.success) {
-                // Apply stricter rate limiting for failed CAPTCHA
-                rateLimiter.check(clientId, RATE_LIMITS.AI_SEARCH_STRICT);
-                return NextResponse.json(
-                    { error: 'Security verification failed. Please try again.', type: 'security' },
-                    { status: 403 }
-                );
-            }
-        }
-
         // Validate file names
         if (!Array.isArray(fileNames) || fileNames.length === 0) {
             return NextResponse.json(
@@ -134,6 +94,7 @@ export async function POST(request: NextRequest) {
 
         // Check cache first
         let result = searchCache.get(searchInput);
+        const wasFromCache = result !== null;
 
         if (!result) {
             // Generate new result
@@ -168,7 +129,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             ...result,
-            cached: searchCache.get(searchInput) !== null,
+            cached: wasFromCache,
             remaining: rateLimitResult.remaining,
         });
 
@@ -183,10 +144,11 @@ export async function POST(request: NextRequest) {
 
 // Handle preflight requests for CORS
 export async function OPTIONS(request: NextRequest) {
+    const allowedOrigin = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://theseonproject.com';
     return new NextResponse(null, {
         status: 200,
         headers: {
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': allowedOrigin,
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type',
         },
