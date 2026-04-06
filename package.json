@@ -48,8 +48,10 @@
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.2.1",
     "genkit": "^1.26.0",
+    "katex": "^0.16.45",
     "lucide-react": "^0.475.0",
     "marked": "^12.0.2",
+    "marked-katex-extension": "^5.1.7",
     "next": "16.0.7",
     "patch-package": "^8.0.0",
     "react": "19.2.1",
@@ -64,6 +66,7 @@
   },
   "devDependencies": {
     "@types/bunyan": "^1.8.9",
+    "@types/katex": "^0.16.8",
     "@types/marked": "^6.0.0",
     "@types/memcached": "^2.2.6",
     "@types/mysql": "^2.15.21",
