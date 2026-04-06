@@ -34,7 +34,7 @@ const getCachedHomepageContent = unstable_cache(
   {
     revalidate: 3600, // 1 hour
     tags: ["homepage"],
-  }
+  },
 );
 
 // Generate dynamic metadata based on AI-generated content
@@ -118,7 +118,7 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
         if (exists) {
           const [contents] = await file.download();
           return JSON.parse(
-            contents.toString("utf-8")
+            contents.toString("utf-8"),
           ) as HomepageContentOutput;
         }
       } catch (e) {
@@ -136,7 +136,7 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
           Accept: "application/vnd.github.raw",
         },
         next: { revalidate: 3600 },
-      }
+      },
     )
       .then((res) => (res.ok ? res.text() : null))
       .catch(() => null);
@@ -146,12 +146,14 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
     // Only attempt generation if an API key is available at runtime
     if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
       console.warn(
-        "Skipping homepage generation: missing GEMINI_API_KEY/GOOGLE_API_KEY"
+        "Skipping homepage generation: missing GEMINI_API_KEY/GOOGLE_API_KEY",
       );
       return null;
     }
 
-    const generated = await generateHomepageContent({ whitepaperContent });
+    const generated = await generateHomepageContent({
+      whitepaperContent: whitepaperContent.substring(0, 15_000),
+    });
 
     // persist to GCS if bucket configured
     if (bucketName) {
@@ -178,7 +180,7 @@ async function getHomepageContent(): Promise<HomepageContentOutput | null> {
 export default async function Home() {
   const homepageContent = await getCachedHomepageContent().catch(() => null);
   const sections = (homepageContent?.sections ?? []).slice(
-    1
+    1,
   ) as HomepageContentOutput["sections"];
 
   return (

@@ -105,17 +105,21 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Verify reCAPTCHA if token provided
-        if (recaptchaToken) {
-            const recaptchaResult = await verifyRecaptcha(recaptchaToken);
-            if (!recaptchaResult.success) {
-                // Apply stricter rate limiting for failed CAPTCHA
-                rateLimiter.check(clientId, RATE_LIMITS.AI_SEARCH_STRICT);
-                return NextResponse.json(
-                    { error: 'Security verification failed. Please try again.', type: 'security' },
-                    { status: 403 }
-                );
-            }
+        // reCAPTCHA is required — reject requests that omit the token entirely
+        if (!recaptchaToken) {
+            return NextResponse.json(
+                { error: 'Security token required.', type: 'security' },
+                { status: 403 }
+            );
+        }
+        const recaptchaResult = await verifyRecaptcha(recaptchaToken);
+        if (!recaptchaResult.success) {
+            // Apply stricter rate limiting for failed CAPTCHA
+            rateLimiter.check(clientId, RATE_LIMITS.AI_SEARCH_STRICT);
+            return NextResponse.json(
+                { error: 'Security verification failed. Please try again.', type: 'security' },
+                { status: 403 }
+            );
         }
 
         // Validate file names
@@ -134,6 +138,7 @@ export async function POST(request: NextRequest) {
 
         // Check cache first
         let result = searchCache.get(searchInput);
+        const wasFromCache = result !== null;
 
         if (!result) {
             // Generate new result
@@ -168,7 +173,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             ...result,
-            cached: searchCache.get(searchInput) !== null,
+            cached: wasFromCache,
             remaining: rateLimitResult.remaining,
         });
 
@@ -183,10 +188,11 @@ export async function POST(request: NextRequest) {
 
 // Handle preflight requests for CORS
 export async function OPTIONS(request: NextRequest) {
+    const allowedOrigin = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://theseonproject.com';
     return new NextResponse(null, {
         status: 200,
         headers: {
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': allowedOrigin,
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type',
         },

@@ -29,7 +29,7 @@ User Query: {{userQuery}}
 Select only the files that are highly relevant to the user query. Return the selected file names in a JSON array.
 
 {{#if fileNames.length}}
-  Given the file names, return only the most relevant file names related to: {{{userQuery}}}. Here are the available files: {{fileNames}}
+  Given the file names, return only the most relevant file names related to: {{userQuery}}. Here are the available files: {{fileNames}}
 {{else}}
   No files available, return empty array.
 {{/if}}

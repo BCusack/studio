@@ -102,8 +102,12 @@ export function getClientIdentifier(request: Request): string {
     const realIp = request.headers.get('x-real-ip');
 
     if (forwardedFor) {
-        // Take the first IP from the comma-separated list
-        return forwardedFor.split(',')[0].trim();
+        // Take the RIGHTMOST IP — this is the address appended by our trusted
+        // proxy (e.g. Firebase / GCP load balancer) and cannot be forged by
+        // the client. The leftmost entries are client-supplied and untrusted.
+        const ips = forwardedFor.split(',').map(ip => ip.trim()).filter(Boolean);
+        const trustedIp = ips[ips.length - 1];
+        if (trustedIp) return trustedIp;
     }
 
     if (realIp) {

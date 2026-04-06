@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com"
+    process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com",
   ),
   alternates: {
     canonical: "/",
@@ -87,6 +87,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const files = await getRepoFiles();
+  const rawGaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
+  const safeGaId = rawGaId && /^G-[A-Z0-9]+$/i.test(rawGaId) ? rawGaId : "";
 
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
@@ -124,9 +126,10 @@ export default async function RootLayout({
                 "@type": "SearchAction",
                 target: {
                   "@type": "EntryPoint",
-                  urlTemplate: `${process.env.NEXT_PUBLIC_BASE_URL ||
+                  urlTemplate: `${
+                    process.env.NEXT_PUBLIC_BASE_URL ||
                     "https://theseonproject.com"
-                    }/?q={search_term_string}`,
+                  }/?q={search_term_string}`,
                 },
                 "query-input": "required name=search_term_string",
               },
@@ -136,9 +139,10 @@ export default async function RootLayout({
                 url:
                   process.env.NEXT_PUBLIC_BASE_URL ||
                   "https://theseonproject.com",
-                logo: `${process.env.NEXT_PUBLIC_BASE_URL ||
+                logo: `${
+                  process.env.NEXT_PUBLIC_BASE_URL ||
                   "https://theseonproject.com"
-                  }/og-image.png`,
+                }/og-image.png`,
                 description:
                   "Exploring AI companions, Zero UI, and ambient agentic experiences.",
               },
@@ -159,7 +163,7 @@ export default async function RootLayout({
                   'ad_personalization':'denied'
                 });
                 try {
-                  var id='${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ?? ""}';
+                  var id='${safeGaId}';
                   var c=localStorage.getItem('cookie-consent');
                   if (id && c==='accepted') {
                     var s=document.createElement('script');
