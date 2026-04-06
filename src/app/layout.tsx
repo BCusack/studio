@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { getRepoFiles } from "@/lib/github";
 import MainLayout from "@/components/main-layout";
 import { Toaster } from "@/components/ui/toaster";
@@ -95,12 +96,6 @@ export default async function RootLayout({
       <head>
         {/* Favicon for browser tab */}
         <link rel="icon" href="/favicon.ico" />
-        {/* KaTeX CSS for math rendering */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"
-          crossOrigin="anonymous"
-        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

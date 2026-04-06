@@ -6,7 +6,9 @@ import sanitizeHtml from "sanitize-html";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-marked.use(markedKatex({ throwOnError: false, output: 'html' }));
+marked.use(
+  markedKatex({ throwOnError: false, output: "html", nonStandard: true }),
+);
 
 type Props = {
   params: Promise<{
@@ -166,8 +168,25 @@ export default async function MarkdownPage({ params }: Props) {
       pre: ["class"],
       span: ["class", "style", "aria-hidden"],
       div: ["class", "style"],
-      svg: ["xmlns", "width", "height", "viewBox", "class", "style", "aria-hidden", "focusable"],
-      path: ["d", "fill", "stroke", "stroke-width", "fill-rule", "clip-rule", "clip-path"],
+      svg: [
+        "xmlns",
+        "width",
+        "height",
+        "viewBox",
+        "class",
+        "style",
+        "aria-hidden",
+        "focusable",
+      ],
+      path: [
+        "d",
+        "fill",
+        "stroke",
+        "stroke-width",
+        "fill-rule",
+        "clip-rule",
+        "clip-path",
+      ],
       line: ["x1", "x2", "y1", "y2", "stroke", "stroke-width"],
       rect: ["x", "y", "width", "height", "fill", "stroke"],
       circle: ["cx", "cy", "r", "fill", "stroke"],
