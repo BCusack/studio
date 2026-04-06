@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { getRepoFiles } from "@/lib/github";
 import MainLayout from "@/components/main-layout";
 import { Toaster } from "@/components/ui/toaster";

@@ -65,8 +65,7 @@ export default function Breadcrumbs({ files }: Props) {
         dangerouslySetInnerHTML={{
           __html: (() => {
             try {
-              const origin =
-                typeof window !== "undefined" ? window.location.origin : "";
+              const origin = process.env.NEXT_PUBLIC_BASE_URL || "";
               const itemListElements = [
                 {
                   "@type": "ListItem",

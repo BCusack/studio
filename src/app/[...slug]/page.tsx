@@ -1,9 +1,19 @@
 import { getFileContent, getRepoFiles } from "@/lib/github";
 import { isHiddenMarkdownPath } from "@/lib/content-filters";
 import { marked } from "marked";
+import markedKatex from "marked-katex-extension";
 import sanitizeHtml from "sanitize-html";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+
+marked.use(
+  markedKatex({
+    throwOnError: false,
+    output: "html",
+    nonStandard: true,
+    strict: "ignore",
+  }),
+);
 
 type Props = {
   params: Promise<{
@@ -121,14 +131,79 @@ export default async function MarkdownPage({ params }: Props) {
       "summary",
       "sup",
       "sub",
+      // KaTeX generates SVG for some constructs
+      "svg",
+      "path",
+      "line",
+      "rect",
+      "circle",
+      "g",
+      "use",
+      "defs",
+      "clipPath",
+      "mask",
+      "text",
+      "tspan",
+      "annotation",
+      "semantics",
+      "math",
+      "mrow",
+      "mn",
+      "mi",
+      "mo",
+      "msup",
+      "msub",
+      "msubsup",
+      "mfrac",
+      "mroot",
+      "msqrt",
+      "mtable",
+      "mtr",
+      "mtd",
+      "munder",
+      "mover",
+      "munderover",
+      "mspace",
+      "mtext",
     ],
     allowedAttributes: {
       a: ["href", "name", "target", "rel"],
       img: ["src", "alt", "title", "width", "height", "loading"],
       code: ["class"],
       pre: ["class"],
-      span: ["class"],
-      div: ["class"],
+      span: ["class", "style", "aria-hidden"],
+      div: ["class", "style"],
+      svg: [
+        "xmlns",
+        "width",
+        "height",
+        "viewBox",
+        "class",
+        "style",
+        "aria-hidden",
+        "focusable",
+      ],
+      path: [
+        "d",
+        "fill",
+        "stroke",
+        "stroke-width",
+        "fill-rule",
+        "clip-rule",
+        "clip-path",
+      ],
+      line: ["x1", "x2", "y1", "y2", "stroke", "stroke-width"],
+      rect: ["x", "y", "width", "height", "fill", "stroke"],
+      circle: ["cx", "cy", "r", "fill", "stroke"],
+      g: ["class", "style", "transform", "clip-path"],
+      use: ["href", "xlink:href", "x", "y", "width", "height"],
+      defs: [],
+      clipPath: ["id"],
+      mask: ["id"],
+      text: ["x", "y", "class", "style", "transform"],
+      tspan: ["x", "y", "class", "dy"],
+      annotation: ["encoding"],
+      math: ["xmlns", "display", "class"],
       "*": ["id"],
     },
     allowedSchemes: ["https", "http", "mailto"],
