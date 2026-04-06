@@ -25,37 +25,10 @@ setInterval(() => {
     }
 }, 10 * 60 * 1000);
 
-async function verifyRecaptcha(token: string): Promise<{ success: boolean; score?: number }> {
-    if (!process.env.RECAPTCHA_SECRET_KEY) {
-        console.warn('RECAPTCHA_SECRET_KEY not configured, skipping verification');
-        return { success: true };
-    }
-
-    try {
-        const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                secret: process.env.RECAPTCHA_SECRET_KEY,
-                response: token,
-            }),
-        });
-
-        const result = await response.json();
-        return {
-            success: result.success && result.score >= 0.5, // Require score >= 0.5
-            score: result.score,
-        };
-    } catch (error) {
-        console.error('reCAPTCHA verification failed:', error);
-        return { success: false };
-    }
-}
-
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { query, fileNames, recaptchaToken } = body;
+        const { query, fileNames } = body;
 
         // Get client identifier
         const clientId = getClientIdentifier(request);
@@ -103,23 +76,6 @@ export async function POST(request: NextRequest) {
                     { status: 429 }
                 );
             }
-        }
-
-        // reCAPTCHA is required — reject requests that omit the token entirely
-        if (!recaptchaToken) {
-            return NextResponse.json(
-                { error: 'Security token required.', type: 'security' },
-                { status: 403 }
-            );
-        }
-        const recaptchaResult = await verifyRecaptcha(recaptchaToken);
-        if (!recaptchaResult.success) {
-            // Apply stricter rate limiting for failed CAPTCHA
-            rateLimiter.check(clientId, RATE_LIMITS.AI_SEARCH_STRICT);
-            return NextResponse.json(
-                { error: 'Security verification failed. Please try again.', type: 'security' },
-                { status: 403 }
-            );
         }
 
         // Validate file names
