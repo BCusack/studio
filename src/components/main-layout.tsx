@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import Logo from "./logo";
@@ -73,6 +74,7 @@ export default function MainLayout({
   files: string[];
   children: ReactNode;
 }) {
+  const pathname = usePathname();
   const fileTree = buildFileTree(files);
 
   // Paper read mode: persisted in localStorage and toggles a root class.
@@ -106,6 +108,11 @@ export default function MainLayout({
       /* ignore */
     }
   }, [paperMode]);
+
+  // Homepage: full-bleed layout — no header, no breadcrumbs, no padding
+  if (pathname === "/") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex flex-col min-h-svh">
