@@ -109,6 +109,13 @@ export default function MainLayout({
     }
   }, [paperMode]);
 
+  // Reset paper mode when on the homepage — the full-bleed design must not be overridden
+  useEffect(() => {
+    if (pathname !== '/') return;
+    const root = document.documentElement;
+    root.classList.remove('paper-mode', 'paper-mode-inverted');
+  }, [pathname]);
+
   // Homepage: full-bleed layout — no header, no breadcrumbs, no padding
   if (pathname === "/") {
     return <>{children}</>;

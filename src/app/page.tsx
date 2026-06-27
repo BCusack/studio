@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
+    <main className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Animated blob mesh background */}
       <div className="hero-bg" aria-hidden="true">
         <span />
@@ -264,6 +264,6 @@ export default function Home() {
           </div>
         </ScrollReveal>
       </section>
-    </div>
+    </main>
   );
 }
