@@ -237,3 +237,95 @@
     color: hsl(var(--muted-foreground)) !important;
   }
 }
+
+/* ============================================================
+   Hero blob mesh background
+   ============================================================ */
+.hero-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  filter: blur(120px);
+  opacity: 0.55;
+}
+
+.hero-bg span {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.hero-bg span:nth-child(1) {
+  width: 55vw;
+  height: 55vw;
+  top: -15%;
+  left: -15%;
+  background: radial-gradient(circle, #00ffff 0%, transparent 70%);
+  opacity: 0.12;
+  animation: hero-blob-1 32s ease-in-out infinite alternate;
+}
+
+.hero-bg span:nth-child(2) {
+  width: 45vw;
+  height: 45vw;
+  top: 25%;
+  right: -15%;
+  background: radial-gradient(circle, #6b21a8 0%, transparent 70%);
+  opacity: 0.10;
+  animation: hero-blob-2 28s ease-in-out infinite alternate;
+}
+
+.hero-bg span:nth-child(3) {
+  width: 40vw;
+  height: 40vw;
+  bottom: -15%;
+  left: 25%;
+  background: radial-gradient(circle, #00ffff 0%, transparent 70%);
+  opacity: 0.08;
+  animation: hero-blob-3 38s ease-in-out infinite alternate;
+}
+
+.hero-bg span:nth-child(4) {
+  width: 35vw;
+  height: 35vw;
+  top: 55%;
+  left: -10%;
+  background: radial-gradient(circle, #1d4ed8 0%, transparent 70%);
+  opacity: 0.10;
+  animation: hero-blob-4 42s ease-in-out infinite alternate;
+}
+
+@keyframes hero-blob-1 {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(15vw, 20vh); }
+}
+
+@keyframes hero-blob-2 {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(-12vw, -15vh); }
+}
+
+@keyframes hero-blob-3 {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(-10vw, -20vh); }
+}
+
+@keyframes hero-blob-4 {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(18vw, -10vh); }
+}
+
+/* ============================================================
+   Scroll reveal
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
