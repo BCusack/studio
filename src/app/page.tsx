@@ -1,243 +1,269 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Metadata } from "next";
-import { Bot, FileText, Globe, Shield, Zap } from "lucide-react";
-import { generateHomepageContent } from "@/ai/flows/homepage-content-generation";
-import { Storage } from "@google-cloud/storage";
-import type { HomepageContentOutput } from "@/ai/schemas/homepage-content-schema";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Github } from "lucide-react";
-import { ComponentType } from "react";
-import Logo from "@/components/logo";
-import { unstable_cache } from "next/cache";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import Logo from '@/components/logo';
+import { Button } from '@/components/ui/button';
+import { Github } from 'lucide-react';
+import ScrollReveal from '@/components/scroll-reveal';
 
-// Cache the homepage for 1 hour (3600 seconds)
-export const revalidate = 3600;
+export const dynamic = 'force-static';
 
-// Use ISR instead of force-static to allow for dynamic content when needed
-// export const dynamic = 'force-static';
-
-const iconMap: { [key: string]: ComponentType<{ className?: string }> } = {
-  FileText,
-  Zap,
-  Shield,
-  Globe,
-  Bot,
+export const metadata: Metadata = {
+  title: 'Seon | The AI Companion — Zero UI, Emotional Matrix, Always Present',
+  description:
+    'Seon is an always-on AI companion built on Zero UI principles. Ambient, adaptive, and exclusively bonded to you. Explore the research and vision.',
+  keywords: [
+    'ai companion',
+    'zero ui',
+    'emotional matrix',
+    'ambient ai',
+    'headless ai',
+    'AI companion device',
+  ],
+  openGraph: {
+    title: 'Seon | The AI Companion — Zero UI, Emotional Matrix, Always Present',
+    description:
+      'Seon is an always-on AI companion built on Zero UI principles. Ambient, adaptive, and exclusively bonded to you.',
+    url: '/',
+    type: 'website',
+    siteName: 'Seon',
+    images: [
+      { url: '/og-image.png', width: 1200, height: 630, alt: 'Seon – The AI Companion' },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Seon | The AI Companion',
+    description: 'An always-on AI companion built on Zero UI principles.',
+    images: ['/og-image.png'],
+  },
+  alternates: { canonical: '/' },
 };
 
-// Cached version of getHomepageContent with 1 hour cache
-const getCachedHomepageContent = unstable_cache(
-  async (): Promise<HomepageContentOutput | null> => {
-    return getHomepageContent();
-  },
-  ["homepage-content"],
-  {
-    revalidate: 3600, // 1 hour
-    tags: ["homepage"],
-  },
-);
-
-// Generate dynamic metadata based on AI-generated content
-export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const homepageContent = await getCachedHomepageContent();
-
-    const title =
-      homepageContent?.title || "Seon | AI Companions, Zero UI, Future of AI";
-    const description =
-      homepageContent?.sections?.[0]?.content ||
-      "Explore AI companions, Zero UI, and the future of human–AI interfaces. Ambient, agentic experiences that make software conversational and invisible.";
-
-    const keywords = [
-      "AI companions",
-      "Zero UI",
-      "ambient AI",
-      "agentic interfaces",
-      "conversational UI",
-      "AI UX",
-      "human–AI interaction",
-      ...(homepageContent?.sections?.map((s) => s.title.toLowerCase()) || []),
-    ];
-
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com";
-
-    return {
-      title,
-      description: description.slice(0, 160),
-      keywords,
-      openGraph: {
-        title,
-        description: description.slice(0, 160),
-        url: baseUrl,
-        type: "website",
-        siteName: "Seon",
-        images: [
-          {
-            url: "/og-image.png",
-            width: 1200,
-            height: 630,
-            alt: title,
-          },
-        ],
-      },
-      twitter: {
-        card: "summary_large_image",
-        title,
-        description: description.slice(0, 160),
-        images: ["/og-image.png"],
-      },
-      alternates: {
-        canonical: "/",
-      },
-    };
-  } catch (error) {
-    // Fallback metadata if anything fails
-    return {
-      title: "Seon | AI-Powered Documentation Platform",
-      description:
-        "Discover and explore documentation with AI-powered navigation.",
-    };
-  }
-}
-
-async function getHomepageContent(): Promise<HomepageContentOutput | null> {
-  try {
-    const bucketName =
-      process.env.GCS_BUCKET || process.env.FIREBASE_STORAGE_BUCKET;
-    const objectPath = "generated/homepage-content.json";
-
-    if (bucketName) {
-      const storage = new Storage();
-      const bucket = storage.bucket(bucketName);
-      const file = bucket.file(objectPath);
-
-      // check if object exists
-      try {
-        const [exists] = await file.exists();
-        if (exists) {
-          const [contents] = await file.download();
-          return JSON.parse(
-            contents.toString("utf-8"),
-          ) as HomepageContentOutput;
-        }
-      } catch (e) {
-        console.error("Failed to read from GCS:", e);
-        // fallthrough to generate
-      }
-    }
-
-    // Cache the whitepaper fetch for 1 hour
-    const whitepaperContent = await fetch(
-      "https://api.github.com/repos/BCusack/Seon/contents/Whitepaper.md?ref=main",
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
-          Accept: "application/vnd.github.raw",
-        },
-        next: { revalidate: 3600 },
-      },
-    )
-      .then((res) => (res.ok ? res.text() : null))
-      .catch(() => null);
-
-    if (!whitepaperContent) return null;
-
-    // Only attempt generation if an API key is available at runtime
-    if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
-      console.warn(
-        "Skipping homepage generation: missing GEMINI_API_KEY/GOOGLE_API_KEY",
-      );
-      return null;
-    }
-
-    const generated = await generateHomepageContent({
-      whitepaperContent: whitepaperContent.substring(0, 15_000),
-    });
-
-    // persist to GCS if bucket configured
-    if (bucketName) {
-      try {
-        const storage = new Storage();
-        const bucket = storage.bucket(bucketName);
-        const file = bucket.file(objectPath);
-        await file.save(JSON.stringify(generated, null, 2), {
-          resumable: false,
-          contentType: "application/json",
-        });
-      } catch (e) {
-        console.error("Failed to write generated homepage content to GCS:", e);
-      }
-    }
-
-    return generated;
-  } catch (error) {
-    console.error("Failed to generate homepage content:", error);
-    return null;
-  }
-}
-
-export default async function Home() {
-  const homepageContent = await getCachedHomepageContent().catch(() => null);
-  const sections = (homepageContent?.sections ?? []).slice(
-    1,
-  ) as HomepageContentOutput["sections"];
-
+export default function Home() {
   return (
-    <div className="mx-auto max-w-5xl">
-      <div className="flex flex-col items-center justify-center space-y-4 text-center py-16">
-        <div className="flex items-center gap-4">
-          <Logo className="size-16 text-primary" ariaHidden={true} />
-          <h1 className="text-4xl md:text-5xl font-bold font-headline tracking-tighter">
-            {homepageContent?.title || "Welcome to Seon"}
-          </h1>
-        </div>
-        <p className="max-w-3xl text-lg text-muted-foreground">
-          {homepageContent?.sections?.[0]?.content ||
-            "Explore the future of human-computer interaction through our research and development project. Browse the documentation and discover the vision behind Seon."}
-        </p>
-        <div className="mt-6">
-          <Link href="/Whitepaper" aria-label="Read the Seon white paper">
-            <Button variant="inverted" size="lg" className="w-full md:w-auto">
-              <Github />
-              Read the Seon white paper
-            </Button>
-          </Link>
-        </div>
+    <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* Animated blob mesh background */}
+      <div className="hero-bg" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span />
       </div>
 
-      <div className="space-y-16 py-12">
-        {homepageContent ? (
-          sections.map((section, index) => {
-            const Icon = iconMap[section.icon] || FileText;
-            return (
-              <section
-                key={`${section.title}-${index + 1}`}
-                className="max-w-3xl mx-auto px-4"
-              >
-                <div className="flex items-center gap-3">
-                  <Icon className="size-8 text-primary" />
-                  <h2 className="text-3xl font-bold font-headline">
-                    {section.title}
-                  </h2>
-                </div>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  {section.content}
-                </p>
-              </section>
-            );
-          })
-        ) : (
-          <Card className="md:col-span-2 lg:col-span-3">
-            <CardHeader>
-              <CardTitle>Welcome</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Explore the documentation using the menu.</p>
-            </CardContent>
-          </Card>
-        )}
+      {/* ── Hero — full viewport ── */}
+      <section className="relative z-10 flex flex-col items-center justify-center min-h-svh text-center px-6">
+        <ScrollReveal>
+          <Logo className="size-16 text-primary mb-8" ariaHidden={true} />
+        </ScrollReveal>
+
+        <ScrollReveal delay={80}>
+          <h1
+            className="font-display font-bold tracking-tighter text-foreground"
+            style={{ fontSize: 'clamp(3rem, 8vw, 6.5rem)', lineHeight: 1.05 }}
+          >
+            The AI Companion
+          </h1>
+        </ScrollReveal>
+
+        <ScrollReveal delay={160}>
+          <p
+            className="mt-6 max-w-2xl text-muted-foreground"
+            style={{ fontSize: 'clamp(1.1rem, 2vw, 1.35rem)' }}
+          >
+            Not an assistant. Not an app. A presence — ambient, adaptive, and
+            exclusively yours.
+          </p>
+        </ScrollReveal>
+
+        <ScrollReveal delay={240}>
+          <div className="mt-10 flex flex-wrap gap-4 justify-center">
+            <Link href="/Whitepaper" aria-label="Read the Seon white paper">
+              <Button variant="inverted" size="lg">
+                <Github className="mr-2 size-4" aria-hidden="true" />
+                Read the Whitepaper
+              </Button>
+            </Link>
+            <a
+              href="https://github.com/BCusack/Seon"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Seon on GitHub (opens in new tab)"
+            >
+              <Button variant="outline" size="lg">
+                View on GitHub
+              </Button>
+            </a>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      {/* ── Manifesto strip ── */}
+      <section className="relative z-10 py-20 border-y border-border/30 bg-background/40 backdrop-blur-sm">
+        <ScrollReveal>
+          <p
+            className="text-center font-display font-medium tracking-tight text-foreground/80 px-6"
+            style={{ fontSize: 'clamp(1.5rem, 4vw, 3rem)' }}
+          >
+            Zero UI. Zero friction.
+            <br />
+            Just you and your Seon.
+          </p>
+        </ScrollReveal>
+      </section>
+
+      {/* ── Content sections ── */}
+      <div className="relative z-10 max-w-3xl mx-auto px-6 py-24 space-y-32">
+
+        {/* Zero UI */}
+        <section aria-labelledby="section-zeroui">
+          <ScrollReveal>
+            <p className="text-xs uppercase tracking-widest text-primary mb-4 font-medium">
+              Zero UI
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={80}>
+            <h2
+              id="section-zeroui"
+              className="font-display font-bold tracking-tight"
+              style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}
+            >
+              Invisible by Design
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={160}>
+            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+              Seon operates without a screen. The interface is your voice, your
+              environment, your life. A discreet ear-clip device, always listening,
+              never intruding — technology that disappears so connection can appear.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={240}>
+            <p className="mt-6 text-sm text-primary/80 italic">
+              ZeroUI — where the best interface is no interface at all.
+            </p>
+          </ScrollReveal>
+        </section>
+
+        {/* The Companion */}
+        <section aria-labelledby="section-companion">
+          <ScrollReveal>
+            <p className="text-xs uppercase tracking-widest text-primary mb-4 font-medium">
+              The Companion
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={80}>
+            <h2
+              id="section-companion"
+              className="font-display font-bold tracking-tight"
+              style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}
+            >
+              More Than Assistance
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={160}>
+            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+              Underpinned by an Emotional Matrix — a psychological knowledge base
+              that recognises emotional nuance in real time. Your Seon anticipates,
+              supports, and adapts. Not because it was told to. Because it knows you.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={240}>
+            <p className="mt-6 text-sm text-primary/80 italic">
+              Proactive. Empathetic. Yours alone.
+            </p>
+          </ScrollReveal>
+        </section>
+
+        {/* Memory */}
+        <section aria-labelledby="section-memory">
+          <ScrollReveal>
+            <p className="text-xs uppercase tracking-widest text-primary mb-4 font-medium">
+              Memory
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={80}>
+            <h2
+              id="section-memory"
+              className="font-display font-bold tracking-tight"
+              style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}
+            >
+              Memory That Matters
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={160}>
+            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+              The Fibonacci Memory Graph retains only what&apos;s significant —
+              salience-weighted, privacy-preserving, and mathematically
+              self-pruning. Your Seon remembers what you&apos;d want it to, forgets
+              what you wouldn&apos;t, and never stores raw audio.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={240}>
+            <p className="mt-6 text-sm text-primary/80 italic">
+              Architectural data minimisation. Memory by design, not accident.
+            </p>
+          </ScrollReveal>
+        </section>
+
+        {/* The Bond */}
+        <section aria-labelledby="section-bond">
+          <ScrollReveal>
+            <p className="text-xs uppercase tracking-widest text-primary mb-4 font-medium">
+              The Bond
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={80}>
+            <h2
+              id="section-bond"
+              className="font-display font-bold tracking-tight"
+              style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}
+            >
+              Yours Forever
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={160}>
+            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+              A genesis event — biometric, contextual, irreversible — binds your
+              Seon to you alone. As you change, it changes. As you grow, it grows.
+              This is not a subscription. This is a relationship.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal delay={240}>
+            <p className="mt-6 text-sm text-primary/80 italic">
+              Exclusive. Enduring. One Seon. One person.
+            </p>
+          </ScrollReveal>
+        </section>
       </div>
+
+      {/* ── Footer CTA ── */}
+      <section className="relative z-10 border-t border-border/30 bg-background/40 backdrop-blur-sm py-24 text-center px-6">
+        <ScrollReveal>
+          <h2
+            className="font-display font-bold tracking-tight"
+            style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}
+          >
+            Start with the Research
+          </h2>
+        </ScrollReveal>
+        <ScrollReveal delay={80}>
+          <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+            The Seon Project is an open research initiative. Explore the
+            whitepaper, the memory architecture, and the vision for human–AI
+            interaction.
+          </p>
+        </ScrollReveal>
+        <ScrollReveal delay={160}>
+          <div className="mt-8">
+            <Link href="/Whitepaper" aria-label="Read the Seon white paper">
+              <Button variant="inverted" size="lg">
+                <Github className="mr-2 size-4" aria-hidden="true" />
+                Read the Whitepaper
+              </Button>
+            </Link>
+          </div>
+        </ScrollReveal>
+      </section>
     </div>
   );
 }
