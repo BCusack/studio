@@ -116,9 +116,28 @@ export default function MainLayout({
     root.classList.remove('paper-mode', 'paper-mode-inverted');
   }, [pathname]);
 
-  // Homepage: full-bleed layout — no header, no breadcrumbs, no padding
+  // Homepage: full-bleed layout — no header chrome, but keep floating menu toggle
   if (pathname === "/") {
-    return <>{children}</>;
+    return (
+      <>
+        <div className="fixed top-4 right-4 z-50">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="bg-background/20 backdrop-blur-sm hover:bg-background/40">
+                <Menu />
+                <span className="sr-only">Open Menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>All Files</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {renderDropdownTree(fileTree)}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        {children}
+      </>
+    );
   }
 
   return (
