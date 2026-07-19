@@ -21,6 +21,325 @@ type Props = {
   }>;
 };
 
+type ParsedFrontmatter = {
+  title?: string;
+  description?: string;
+  summary?: string;
+  excerpt?: string;
+  canonical?: string;
+  slug?: string;
+  keywords?: string[];
+  tags?: string[];
+  authors?: string[];
+};
+
+type ParsedMarkdownDocument = {
+  body: string;
+  rawFrontmatter: string | null;
+  frontmatter: ParsedFrontmatter;
+  title: string;
+  description?: string;
+  keywords: string[];
+  canonicalPath: string;
+};
+
+function resolveMarkdownPath(slug: string[]): string {
+  if (slug.some((segment) => segment === ".." || segment === ".")) {
+    notFound();
+  }
+
+  let path = slug.join("/");
+  if (!path.endsWith(".md")) {
+    path = `${path}.md`;
+  }
+
+  if (isHiddenMarkdownPath(path)) {
+    notFound();
+  }
+
+  return path;
+}
+
+function splitFrontmatter(content: string) {
+  if (!content.startsWith("---\n") && !content.startsWith("---\r\n")) {
+    return { rawFrontmatter: null, body: content };
+  }
+
+  const lines = content.split(/\r?\n/);
+  if (lines[0].trim() !== "---") {
+    return { rawFrontmatter: null, body: content };
+  }
+
+  const closingIndex = lines.findIndex(
+    (line, index) => index > 0 && line.trim() === "---",
+  );
+  if (closingIndex === -1) {
+    return { rawFrontmatter: null, body: content };
+  }
+
+  return {
+    rawFrontmatter: lines.slice(1, closingIndex).join("\n").trim(),
+    body: lines
+      .slice(closingIndex + 1)
+      .join("\n")
+      .trimStart(),
+  };
+}
+
+function cleanScalar(value: string): string {
+  return value.replace(/^['"]|['"]$/g, "").trim();
+}
+
+function parseInlineList(value: string): string[] {
+  return value
+    .replace(/^\[/, "")
+    .replace(/\]$/, "")
+    .split(",")
+    .map((item) => cleanScalar(item))
+    .filter(Boolean);
+}
+
+function extractFrontmatterValue(
+  rawFrontmatter: string,
+  key: string,
+): string | string[] | undefined {
+  const lines = rawFrontmatter.split(/\r?\n/);
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const match = lines[index].match(new RegExp(`^${key}:\\s*(.*)$`, "i"));
+    if (!match) {
+      continue;
+    }
+
+    const inlineValue = match[1].trim();
+    if (inlineValue) {
+      if (inlineValue.startsWith("[") && inlineValue.endsWith("]")) {
+        return parseInlineList(inlineValue);
+      }
+
+      return cleanScalar(inlineValue);
+    }
+
+    const listValues: string[] = [];
+    for (let nextIndex = index + 1; nextIndex < lines.length; nextIndex += 1) {
+      const nextLine = lines[nextIndex];
+      if (!nextLine.trim()) {
+        if (listValues.length > 0) {
+          break;
+        }
+        continue;
+      }
+
+      const listMatch = nextLine.match(/^\s*[-*]\s+(.+)$/);
+      if (!listMatch) {
+        break;
+      }
+
+      listValues.push(cleanScalar(listMatch[1]));
+    }
+
+    if (listValues.length > 0) {
+      return listValues;
+    }
+
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function toStringArray(value: string | string[] | undefined): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
+}
+
+function stripMarkdown(value: string): string {
+  return value
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/[`*_>#~]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractHeadingTitle(body: string): string | undefined {
+  const headingLine = body
+    .split(/\r?\n/)
+    .find((line) => /^#\s+/.test(line.trim()));
+  if (!headingLine) {
+    return undefined;
+  }
+
+  return stripMarkdown(headingLine.replace(/^#\s+/, ""));
+}
+
+function extractDescription(body: string): string | undefined {
+  const paragraphLine = body
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find((line) => line && !line.startsWith("#") && !line.startsWith("---"));
+
+  if (!paragraphLine) {
+    return undefined;
+  }
+
+  return stripMarkdown(paragraphLine).slice(0, 200);
+}
+
+function normalizeCanonicalPath(
+  value: string | undefined,
+  fallbackPath: string,
+): string {
+  if (!value) {
+    return `/${fallbackPath.replace(/\.md$/, "")}`;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      return new URL(value).pathname || `/${fallbackPath.replace(/\.md$/, "")}`;
+    } catch {
+      return `/${fallbackPath.replace(/\.md$/, "")}`;
+    }
+  }
+
+  return value.startsWith("/") ? value : `/${value.replace(/^\/+/, "")}`;
+}
+
+function parseMarkdownDocument(
+  path: string,
+  content: string,
+): ParsedMarkdownDocument {
+  const { rawFrontmatter, body } = splitFrontmatter(content);
+  const frontmatter: ParsedFrontmatter = rawFrontmatter
+    ? {
+        title:
+          typeof extractFrontmatterValue(rawFrontmatter, "title") === "string"
+            ? (extractFrontmatterValue(rawFrontmatter, "title") as string)
+            : undefined,
+        description:
+          typeof extractFrontmatterValue(rawFrontmatter, "description") ===
+          "string"
+            ? (extractFrontmatterValue(rawFrontmatter, "description") as string)
+            : undefined,
+        summary:
+          typeof extractFrontmatterValue(rawFrontmatter, "summary") === "string"
+            ? (extractFrontmatterValue(rawFrontmatter, "summary") as string)
+            : undefined,
+        excerpt:
+          typeof extractFrontmatterValue(rawFrontmatter, "excerpt") === "string"
+            ? (extractFrontmatterValue(rawFrontmatter, "excerpt") as string)
+            : undefined,
+        canonical:
+          typeof extractFrontmatterValue(rawFrontmatter, "canonical") ===
+          "string"
+            ? (extractFrontmatterValue(rawFrontmatter, "canonical") as string)
+            : undefined,
+        slug:
+          typeof extractFrontmatterValue(rawFrontmatter, "slug") === "string"
+            ? (extractFrontmatterValue(rawFrontmatter, "slug") as string)
+            : undefined,
+        keywords: toStringArray(
+          extractFrontmatterValue(rawFrontmatter, "keywords"),
+        ),
+        tags: toStringArray(extractFrontmatterValue(rawFrontmatter, "tags")),
+        authors: toStringArray(
+          extractFrontmatterValue(rawFrontmatter, "authors"),
+        ),
+      }
+    : {};
+
+  const title =
+    frontmatter.title ||
+    extractHeadingTitle(body) ||
+    path.replace(/\.md$/, "").split("/").pop()?.replace(/[-_]/g, " ") ||
+    "Document";
+
+  const description =
+    frontmatter.description ||
+    frontmatter.summary ||
+    frontmatter.excerpt ||
+    extractDescription(body);
+
+  const keywords = [
+    ...(frontmatter.keywords || []),
+    ...(frontmatter.tags || []),
+  ].filter(Boolean);
+  const canonicalSource = frontmatter.canonical || frontmatter.slug;
+
+  return {
+    body,
+    rawFrontmatter,
+    frontmatter,
+    title,
+    description,
+    keywords,
+    canonicalPath: normalizeCanonicalPath(canonicalSource, path),
+  };
+}
+
+function getBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com";
+}
+
+function serializeJsonForHtml(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolvedParams = (await params) as { slug: string[] };
+  const path = resolveMarkdownPath(resolvedParams.slug);
+  const content = await getFileContent(path);
+  const document = parseMarkdownDocument(path, content);
+  const url = `${getBaseUrl()}${document.canonicalPath}`;
+  const other: NonNullable<Metadata["other"]> = {
+    "okf:present": document.rawFrontmatter ? "true" : "false",
+    "okf:path": path,
+  };
+
+  if (document.frontmatter.title) {
+    other["okf:title"] = document.frontmatter.title;
+  }
+  if (document.frontmatter.description) {
+    other["okf:description"] = document.frontmatter.description;
+  }
+  if (document.frontmatter.summary) {
+    other["okf:summary"] = document.frontmatter.summary;
+  }
+  if (document.frontmatter.excerpt) {
+    other["okf:excerpt"] = document.frontmatter.excerpt;
+  }
+  if (document.keywords.length > 0) {
+    other["okf:keywords"] = document.keywords.join(", ");
+  }
+  if (document.frontmatter.authors && document.frontmatter.authors.length > 0) {
+    other["okf:authors"] = document.frontmatter.authors.join(", ");
+  }
+
+  return {
+    title: document.title,
+    description: document.description,
+    keywords: document.keywords.length > 0 ? document.keywords : undefined,
+    alternates: {
+      canonical: document.canonicalPath,
+    },
+    openGraph: {
+      type: "article",
+      url: document.canonicalPath,
+      title: document.title,
+      description: document.description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: document.title,
+      description: document.description,
+    },
+    other,
+  };
+}
+
 export async function generateStaticParams() {
   try {
     const files = await getRepoFiles();
@@ -43,24 +362,35 @@ export async function generateStaticParams() {
 
 export default async function MarkdownPage({ params }: Props) {
   const resolvedParams = (await params) as { slug: string[] };
-  // Reject path traversal attempts before any further processing
-  if (
-    resolvedParams.slug.some((segment) => segment === ".." || segment === ".")
-  ) {
-    notFound();
-  }
-  let path = resolvedParams.slug.join("/");
-  if (!path.endsWith(".md")) {
-    path = `${path}.md`;
-  }
-
-  if (isHiddenMarkdownPath(path)) {
-    notFound();
-  }
+  const path = resolveMarkdownPath(resolvedParams.slug);
 
   const content = await getFileContent(path);
+  const document = parseMarkdownDocument(path, content);
+  const okfPayload = document.rawFrontmatter
+    ? {
+        path,
+        url: `${getBaseUrl()}${document.canonicalPath}`,
+        title: document.title,
+        description: document.description,
+        keywords: document.keywords,
+        frontmatter: document.frontmatter,
+        rawFrontmatter: document.rawFrontmatter,
+      }
+    : null;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: document.title,
+    description: document.description,
+    keywords: document.keywords,
+    url: `${getBaseUrl()}${document.canonicalPath}`,
+    author: document.frontmatter.authors?.map((name) => ({
+      "@type": "Person",
+      name,
+    })),
+  };
 
-  const htmlContent = await marked.parse(content);
+  const htmlContent = await marked.parse(document.body);
   const decodeEntities = (value: string) =>
     value
       .replace(/&nbsp;/gi, " ")
@@ -211,101 +541,26 @@ export default async function MarkdownPage({ params }: Props) {
   });
 
   return (
-    <article
-      className="max-w-4xl mx-auto markdown-content"
-      dangerouslySetInnerHTML={{ __html: sanitized }}
-    />
+    <>
+      {okfPayload ? (
+        <script
+          id="open-knowledge-format"
+          type="application/json"
+          dangerouslySetInnerHTML={{
+            __html: serializeJsonForHtml(okfPayload),
+          }}
+        />
+      ) : null}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonForHtml(structuredData),
+        }}
+      />
+      <article
+        className="max-w-4xl mx-auto markdown-content"
+        dangerouslySetInnerHTML={{ __html: sanitized }}
+      />
+    </>
   );
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const resolvedParams = await params;
-  let path = resolvedParams.slug.join("/");
-  if (!path.endsWith(".md")) {
-    path = `${path}.md`;
-  }
-  if (isHiddenMarkdownPath(path)) {
-    return {
-      title: "Page Not Found",
-      description: "The requested page could not be found.",
-    };
-  }
-  const content = await getFileContent(path);
-
-  if (!content) {
-    return {
-      title: "Page Not Found",
-      description: "The requested page could not be found.",
-    };
-  }
-
-  // Extract title from first heading or use filename
-  const lines = content.split("\n").filter(Boolean);
-  let title = path.replace(/\.(md|mdx)$/, "").replace(/\//g, " › ");
-  let description = "";
-
-  // Look for first heading
-  const firstHeading = lines.find((line) => line.startsWith("#"));
-  if (firstHeading) {
-    title = firstHeading.replace(/^#+\s*/, "").trim();
-  }
-
-  // Extract description from first paragraph or first few non-heading lines
-  const contentLines = lines.filter(
-    (line) =>
-      !line.startsWith("#") &&
-      !line.startsWith("```") &&
-      !line.startsWith("---") &&
-      line.trim().length > 20,
-  );
-
-  if (contentLines.length > 0) {
-    description =
-      contentLines[0]
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // Remove markdown links
-        .replace(/[*_`]/g, "") // Remove markdown formatting
-        .slice(0, 160) + (contentLines[0].length > 160 ? "..." : "");
-  }
-
-  // Fallback description aligned with site positioning
-  if (!description) {
-    description = `Explore ${title} — insights on AI companions, Zero UI, and the future of human–AI interfaces.`;
-  }
-
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com";
-  const url = `${baseUrl}/${path}`;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: `/${path}`,
-    },
-    openGraph: {
-      title: `${title} | Seon`,
-      description,
-      url,
-      type: "article",
-      siteName: "Seon",
-      images: [
-        {
-          url: "/og-image.png",
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} | Seon`,
-      description,
-      images: ["/og-image.png"],
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
 }
