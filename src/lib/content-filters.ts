@@ -10,5 +10,6 @@ const HIDDEN_BASENAME_PATTERNS = [
 /** Returns true if the given repo path points to a markdown file we want to hide. */
 export function isHiddenMarkdownPath(path: string): boolean {
     const base = path.split("/").pop() || path;
-    return HIDDEN_BASENAME_PATTERNS.some((re) => re.test(base));
+    return /^project\/planning(?:\.md)?$/i.test(path) ||
+        HIDDEN_BASENAME_PATTERNS.some((re) => re.test(base));
 }

@@ -1,243 +1,219 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Metadata } from "next";
-import { Bot, FileText, Globe, Shield, Zap } from "lucide-react";
-import { generateHomepageContent } from "@/ai/flows/homepage-content-generation";
-import { Storage } from "@google-cloud/storage";
-import type { HomepageContentOutput } from "@/ai/schemas/homepage-content-schema";
 import Link from "next/link";
+import { ArrowDown, ArrowRight, BookOpen, Github, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Github } from "lucide-react";
-import { ComponentType } from "react";
 import Logo from "@/components/logo";
-import { unstable_cache } from "next/cache";
 
-// Cache the homepage for 1 hour (3600 seconds)
-export const revalidate = 3600;
+const description =
+  "Seon is a research and development project exploring AI companions and a more natural, ambient future for human-computer interaction.";
 
-// Use ISR instead of force-static to allow for dynamic content when needed
-// export const dynamic = 'force-static';
-
-const iconMap: { [key: string]: ComponentType<{ className?: string }> } = {
-  FileText,
-  Zap,
-  Shield,
-  Globe,
-  Bot,
+export const metadata: Metadata = {
+  title: { absolute: "Seon | A more human future for AI" },
+  description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Seon | A more human future for AI",
+    description,
+    url: "/",
+    type: "website",
+    siteName: "Seon",
+  },
+  twitter: {
+    card: "summary",
+    title: "Seon | A more human future for AI",
+    description,
+  },
 };
 
-// Cached version of getHomepageContent with 1 hour cache
-const getCachedHomepageContent = unstable_cache(
-  async (): Promise<HomepageContentOutput | null> => {
-    return getHomepageContent();
-  },
-  ["homepage-content"],
+const ideas = [
   {
-    revalidate: 3600, // 1 hour
-    tags: ["homepage"],
+    number: "01",
+    title: "Companionship, not just commands",
+    description:
+      "Exploring AI companions that make interaction feel more personal, conversational, and grounded in human needs.",
   },
-);
+  {
+    number: "02",
+    title: "Beyond the screen",
+    description:
+      "Imagining ambient experiences that move beyond apps and interfaces, bringing technology into the flow of everyday life.",
+  },
+  {
+    number: "03",
+    title: "Built on open inquiry",
+    description:
+      "Sharing the research, questions, and development behind Seon as the project takes shape.",
+  },
+];
 
-// Generate dynamic metadata based on AI-generated content
-export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const homepageContent = await getCachedHomepageContent();
+const paths = [
+  {
+    label: "The vision",
+    title: "Read the whitepaper",
+    description: "Explore the thinking and ambition behind the project.",
+    href: "/Whitepaper",
+    icon: BookOpen,
+  },
+  {
+    label: "The process",
+    title: "Explore discovery",
+    description: "See the questions and investigation shaping Seon.",
+    href: "/Project/Discovery",
+    icon: Sparkles,
+  },
+  {
+    label: "The research",
+    title: "Explore Zero UI",
+    description: "Discover the ideas behind more natural AI interactions.",
+    href: "/Research/Zero UI AI Companions",
+    icon: ArrowRight,
+  },
+];
 
-    const title =
-      homepageContent?.title || "Seon | AI Companions, Zero UI, Future of AI";
-    const description =
-      homepageContent?.sections?.[0]?.content ||
-      "Explore AI companions, Zero UI, and the future of human–AI interfaces. Ambient, agentic experiences that make software conversational and invisible.";
-
-    const keywords = [
-      "AI companions",
-      "Zero UI",
-      "ambient AI",
-      "agentic interfaces",
-      "conversational UI",
-      "AI UX",
-      "human–AI interaction",
-      ...(homepageContent?.sections?.map((s) => s.title.toLowerCase()) || []),
-    ];
-
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || "https://theseonproject.com";
-
-    return {
-      title,
-      description: description.slice(0, 160),
-      keywords,
-      openGraph: {
-        title,
-        description: description.slice(0, 160),
-        url: baseUrl,
-        type: "website",
-        siteName: "Seon",
-        images: [
-          {
-            url: "/og-image.png",
-            width: 1200,
-            height: 630,
-            alt: title,
-          },
-        ],
-      },
-      twitter: {
-        card: "summary_large_image",
-        title,
-        description: description.slice(0, 160),
-        images: ["/og-image.png"],
-      },
-      alternates: {
-        canonical: "/",
-      },
-    };
-  } catch (error) {
-    // Fallback metadata if anything fails
-    return {
-      title: "Seon | AI-Powered Documentation Platform",
-      description:
-        "Discover and explore documentation with AI-powered navigation.",
-    };
-  }
-}
-
-async function getHomepageContent(): Promise<HomepageContentOutput | null> {
-  try {
-    const bucketName =
-      process.env.GCS_BUCKET || process.env.FIREBASE_STORAGE_BUCKET;
-    const objectPath = "generated/homepage-content.json";
-
-    if (bucketName) {
-      const storage = new Storage();
-      const bucket = storage.bucket(bucketName);
-      const file = bucket.file(objectPath);
-
-      // check if object exists
-      try {
-        const [exists] = await file.exists();
-        if (exists) {
-          const [contents] = await file.download();
-          return JSON.parse(
-            contents.toString("utf-8"),
-          ) as HomepageContentOutput;
-        }
-      } catch (e) {
-        console.error("Failed to read from GCS:", e);
-        // fallthrough to generate
-      }
-    }
-
-    // Cache the whitepaper fetch for 1 hour
-    const whitepaperContent = await fetch(
-      "https://api.github.com/repos/BCusack/Seon/contents/Whitepaper.md?ref=main",
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
-          Accept: "application/vnd.github.raw",
-        },
-        next: { revalidate: 3600 },
-      },
-    )
-      .then((res) => (res.ok ? res.text() : null))
-      .catch(() => null);
-
-    if (!whitepaperContent) return null;
-
-    // Only attempt generation if an API key is available at runtime
-    if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_API_KEY) {
-      console.warn(
-        "Skipping homepage generation: missing GEMINI_API_KEY/GOOGLE_API_KEY",
-      );
-      return null;
-    }
-
-    const generated = await generateHomepageContent({
-      whitepaperContent: whitepaperContent.substring(0, 15_000),
-    });
-
-    // persist to GCS if bucket configured
-    if (bucketName) {
-      try {
-        const storage = new Storage();
-        const bucket = storage.bucket(bucketName);
-        const file = bucket.file(objectPath);
-        await file.save(JSON.stringify(generated, null, 2), {
-          resumable: false,
-          contentType: "application/json",
-        });
-      } catch (e) {
-        console.error("Failed to write generated homepage content to GCS:", e);
-      }
-    }
-
-    return generated;
-  } catch (error) {
-    console.error("Failed to generate homepage content:", error);
-    return null;
-  }
-}
-
-export default async function Home() {
-  const homepageContent = await getCachedHomepageContent().catch(() => null);
-  const sections = (homepageContent?.sections ?? []).slice(
-    1,
-  ) as HomepageContentOutput["sections"];
-
+export default function Home() {
   return (
     <div className="mx-auto max-w-5xl">
-      <div className="flex flex-col items-center justify-center space-y-4 text-center py-16">
-        <div className="flex items-center gap-4">
-          <Logo className="size-16 text-primary" ariaHidden={true} />
-          <h1 className="text-4xl md:text-5xl font-bold font-headline tracking-tighter">
-            {homepageContent?.title || "Welcome to Seon"}
-          </h1>
+      <section className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden border-b border-border">
+        <div
+          aria-hidden="true"
+          className="landing-hero-glow pointer-events-none absolute inset-0"
+        />
+        <div className="relative mx-auto max-w-5xl px-4 py-20 sm:py-28 lg:py-36">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-36 top-4 h-80 w-80 rounded-full border border-primary/20 bg-primary/5 sm:right-4 sm:h-[28rem] sm:w-[28rem]"
+          >
+            <div className="absolute inset-10 rounded-full border border-primary/20 sm:inset-16" />
+            <div className="absolute inset-20 rounded-full border border-primary/30 sm:inset-32" />
+            <Logo className="absolute inset-0 m-auto size-16 text-primary/40 sm:size-24" ariaHidden={true} />
+          </div>
+          <div className="relative max-w-3xl">
+            <p className="mb-6 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-primary">
+              <span className="size-2 rounded-full bg-primary" />
+              An open research &amp; development project
+            </p>
+            <h1 className="font-headline text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+              A more human future for <span className="text-primary">AI.</span>
+            </h1>
+            <p className="mt-7 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+              Seon explores AI companions and a world where technology feels less
+              like an interface, and more like a natural part of life.
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <Link href="/Whitepaper">
+                  Read the whitepaper <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <a href="#ideas">
+                  Explore the ideas <ArrowDown aria-hidden="true" />
+                </a>
+              </Button>
+            </div>
+          </div>
         </div>
-        <p className="max-w-3xl text-lg text-muted-foreground">
-          {homepageContent?.sections?.[0]?.content ||
-            "Explore the future of human-computer interaction through our research and development project. Browse the documentation and discover the vision behind Seon."}
-        </p>
-        <div className="mt-6">
-          <Link href="/Whitepaper" aria-label="Read the Seon white paper">
-            <Button variant="inverted" size="lg" className="w-full md:w-auto">
-              <Github />
-              Read the Seon white paper
-            </Button>
-          </Link>
-        </div>
-      </div>
+      </section>
 
-      <div className="space-y-16 py-12">
-        {homepageContent ? (
-          sections.map((section, index) => {
-            const Icon = iconMap[section.icon] || FileText;
-            return (
-              <section
-                key={`${section.title}-${index + 1}`}
-                className="max-w-3xl mx-auto px-4"
-              >
-                <div className="flex items-center gap-3">
-                  <Icon className="size-8 text-primary" />
-                  <h2 className="text-3xl font-bold font-headline">
-                    {section.title}
-                  </h2>
-                </div>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  {section.content}
-                </p>
-              </section>
-            );
-          })
-        ) : (
-          <Card className="md:col-span-2 lg:col-span-3">
-            <CardHeader>
-              <CardTitle>Welcome</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Explore the documentation using the menu.</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      <section id="ideas" className="scroll-mt-20 py-20 sm:py-24">
+        <div className="grid gap-6 md:grid-cols-2 md:gap-16">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+              The idea behind Seon
+            </p>
+            <h2 className="mt-4 max-w-md font-headline text-3xl font-bold tracking-tight sm:text-4xl">
+              Less interface. More connection.
+            </h2>
+          </div>
+          <p className="max-w-xl text-lg leading-relaxed text-muted-foreground">
+            What if computing adapted to people, instead of asking people to
+            adapt to it? Seon is an ongoing exploration of that question,
+            bringing together AI companions, ambient technology, and Zero UI.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
+          {ideas.map((idea) => (
+            <article key={idea.number} className="bg-card p-7 sm:p-8">
+              <span className="font-headline text-sm text-primary">
+                {idea.number} / 03
+              </span>
+              <h3 className="mt-8 font-headline text-xl font-bold">
+                {idea.title}
+              </h3>
+              <p className="mt-3 leading-relaxed text-muted-foreground">
+                {idea.description}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-t border-border py-20 sm:py-24">
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+              Go deeper
+            </p>
+            <h2 className="mt-4 font-headline text-3xl font-bold tracking-tight sm:text-4xl">
+              Follow the thinking.
+            </h2>
+          </div>
+          <p className="max-w-sm text-muted-foreground">
+            Start with the vision, or explore how the project is taking shape.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          {paths.map(({ label, title, description: pathDescription, href, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className="group flex min-h-56 flex-col rounded-xl border border-border bg-card p-7 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <div className="flex items-center justify-between text-primary">
+                <Icon className="size-5" aria-hidden="true" />
+                <ArrowRight className="size-5 transition-transform group-hover:translate-x-1 motion-reduce:transform-none" aria-hidden="true" />
+              </div>
+              <p className="mt-8 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                {label}
+              </p>
+              <h3 className="mt-2 font-headline text-xl font-bold">{title}</h3>
+              <p className="mt-2 leading-relaxed text-muted-foreground">
+                {pathDescription}
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-16 rounded-xl border border-primary/20 bg-primary/5 p-8 sm:p-12">
+        <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
+          <div className="max-w-xl">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
+              An evolving project
+            </p>
+            <h2 className="mt-4 font-headline text-3xl font-bold tracking-tight">
+              The future is a conversation.
+            </h2>
+            <p className="mt-4 leading-relaxed text-muted-foreground">
+              Seon is a work in progress. Explore the source, follow the
+              research, and help support the journey.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild variant="outline">
+              <a href="https://github.com/BCusack/Seon" target="_blank" rel="noopener noreferrer">
+                <Github aria-hidden="true" /> View on GitHub
+              </a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="https://ko-fi.com/W7W31G9CXW" target="_blank" rel="noopener noreferrer">
+                <Heart aria-hidden="true" /> Support Seon
+              </a>
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
