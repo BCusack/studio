@@ -16,7 +16,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Github, Heart } from "lucide-react";
+import { Menu, Github, Heart } from "lucide-react";
 
 type FileTree = {
   [key: string]: FileTree | string;
@@ -125,30 +125,9 @@ export default function MainLayout({
           <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="group rounded-full border border-border bg-background/80 transition-colors hover:border-primary hover:bg-primary/10"
-                  aria-label="Open menu"
-                >
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 16 16"
-                    className="size-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.25"
-                    strokeLinecap="round"
-                  >
-                    <path
-                      d="M3 5h10M3 8h10M3 11h10"
-                      className="origin-center transition-all duration-200 group-data-[state=open]:scale-0 group-data-[state=open]:opacity-0"
-                    />
-                    <path
-                      d="m5 5 6 6M11 5l-6 6"
-                      className="origin-center scale-75 opacity-0 transition-all duration-200 group-data-[state=open]:scale-100 group-data-[state=open]:opacity-100"
-                    />
-                  </svg>
+                <Button variant="ghost" size="icon">
+                  <Menu />
+                  <span className="sr-only">Open Menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
