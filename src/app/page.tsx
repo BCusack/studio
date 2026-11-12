@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, BookOpen, Github, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/logo";
 
 const description =
   "Seon is a research and development project exploring AI companions and a more natural, ambient future for human-computer interaction.";
@@ -78,7 +78,15 @@ export default function Home() {
           aria-hidden="true"
           className="landing-hero-glow pointer-events-none absolute inset-0"
         />
-        <div className="relative mx-auto grid max-w-5xl items-center gap-12 px-4 py-20 sm:py-28 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16 lg:py-36">
+        <div className="relative mx-auto max-w-5xl px-4 py-20 sm:py-28 lg:py-36">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-36 top-4 h-80 w-80 rounded-full border border-primary/20 bg-primary/5 sm:right-4 sm:h-[28rem] sm:w-[28rem]"
+          >
+            <div className="absolute inset-10 rounded-full border border-primary/20 sm:inset-16" />
+            <div className="absolute inset-20 rounded-full border border-primary/30 sm:inset-32" />
+            <Logo className="absolute inset-0 m-auto size-16 text-primary/40 sm:size-24" ariaHidden={true} />
+          </div>
           <div className="relative max-w-3xl">
             <p className="mb-6 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-primary">
               <span className="size-2 rounded-full bg-primary" />
@@ -104,16 +112,6 @@ export default function Home() {
               </Button>
             </div>
           </div>
-          <div className="landing-image relative aspect-[4/3] overflow-hidden rounded-2xl border border-primary/20 shadow-[0_0_80px_hsl(var(--primary)/0.08)] lg:aspect-[4/5]">
-            <Image
-              src="/in-nature.jpeg"
-              alt="A person standing among trees with their arms outstretched"
-              fill
-              priority
-              sizes="(min-width: 1024px) 410px, (min-width: 640px) 90vw, 100vw"
-              className="object-cover object-[40%_center]"
-            />
-          </div>
         </div>
       </section>
 
@@ -132,16 +130,6 @@ export default function Home() {
             adapt to it? Seon is an ongoing exploration of that question,
             bringing together AI companions, ambient technology, and Zero UI.
           </p>
-        </div>
-
-        <div className="landing-image relative mt-12 h-52 overflow-hidden rounded-xl border border-border sm:h-72">
-          <Image
-            src="/robot-hand.jpeg"
-            alt="A robotic hand holding a white flower"
-            fill
-            sizes="(min-width: 1024px) 1024px, 100vw"
-            className="object-cover object-center"
-          />
         </div>
 
         <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">

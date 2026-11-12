@@ -185,9 +185,7 @@
   }
 
   .paper-mode img,
-  .paper-mode-inverted img,
-  .paper-mode .landing-image,
-  .paper-mode-inverted .landing-image {
+  .paper-mode-inverted img {
     @apply hidden;
   }
 
