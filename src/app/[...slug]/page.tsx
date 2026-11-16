@@ -6,6 +6,9 @@ import sanitizeHtml from "sanitize-html";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
+// Refresh document pages hourly from the Seon repo.
+export const revalidate = 3600;
+
 marked.use(
   markedKatex({
     throwOnError: false,
