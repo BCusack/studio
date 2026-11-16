@@ -64,6 +64,8 @@ const nextConfig: NextConfig = {
   // Removed output: 'export' to enable ISR and other runtime features
   // This allows Server Actions and dynamic SEO features
   trailingSlash: false,
+  // Cap how long a stale ISR page may be served (default is 1 year).
+  expireTime: 86400,
   images: {
     unoptimized: true,
     remotePatterns: [

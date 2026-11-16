@@ -4,6 +4,8 @@ import { ArrowDown, ArrowRight, BookOpen, Github, Heart, Sparkles } from "lucide
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/logo";
 
+export const revalidate = 3600;
+
 const description =
   "Seon is a research and development project exploring AI companions and a more natural, ambient future for human-computer interaction.";
 
