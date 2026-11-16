@@ -74,7 +74,7 @@ const paths = [
 
 export default function Home() {
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-5xl overflow-x-clip">
       <section className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden border-b border-border">
         <div
           aria-hidden="true"
