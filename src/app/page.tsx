@@ -57,10 +57,10 @@ const paths = [
     icon: BookOpen,
   },
   {
-    label: "The process",
-    title: "Explore discovery",
-    description: "See the questions and investigation shaping Seon.",
-    href: "/Project/Discovery",
+    label: "The argument",
+    title: "Beyond the smartphone",
+    description: "A case for a companion that respects your attention instead of competing for it.",
+    href: "/Research/Beyond The Smart Phone",
     icon: Sparkles,
   },
   {

@@ -73,7 +73,10 @@ export default function MainLayout({
   files: string[];
   children: ReactNode;
 }) {
-  const fileTree = buildFileTree(files);
+  // Hide the Project folder from the menu; its pages stay reachable by URL.
+  const fileTree = buildFileTree(
+    files.filter((path) => !/^project\//i.test(path))
+  );
 
   // Paper read mode: persisted in localStorage and toggles a root class.
   // Modes: 'off' | 'default' | 'inverted'
